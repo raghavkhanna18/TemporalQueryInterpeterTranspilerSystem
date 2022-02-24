@@ -1,0 +1,7 @@
+#!/bin/bash
+echo "WACC Compiler"
+echo ""
+
+echo "Compiling file $1"
+java -cp build/libs/wacc-all.jar wacc.MainKt $@
+exit $?

@@ -1,0 +1,26 @@
+#ignore generated binary files and auto-generated ANTLR code
+bin/
+gen/
+src/main/java/antlr/
+
+#ignore Java class files
+*.class
+
+#ignore other junk files
+*~
+
+.idea/
+
+.DS_Store
+
+#ignore gradle files
+.gradle/
+!gradle-wrapper.jar
+build/
+
+out/
+*.iml
+
+*.tokens
+
+*.s
