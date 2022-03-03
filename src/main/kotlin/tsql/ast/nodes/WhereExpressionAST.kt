@@ -2,18 +2,16 @@ package tsql.ast.nodes
 
 import tsql.ast.nodes.visitor.Visitable
 import tsql.ast.symbol_table.SymbolTableInterface
+import tsql.ast.types.EBinOp
 import tsql.error.SemanticErrorListener
 import tsql.error.SyntaxErrorListener
 
-class StatementAST(
-    override val position: Pair<Pair<Int, Int>, Pair<Int, Int>>,
-    selectAST: SelectAST,
-    DataSourceAST: DataSourceI,
-    whereOperationAST: WhereOperationAST,
-    modalOperationAST: ModalOperationAST,
-    atOperationAST: AtOperationAST
-) : AstNode,
-    Visitable() {
+class WhereExpressionAST (
+    override val position: Pair<Pair<Int, Int>, Pair<Int, Int>> = Pair(Pair(0, 0), Pair(0, 0)),
+    val lhs: AttributeAST,
+    val rhs: AttributeAST,
+    val comparator: ComparatorAST
+)  : AstNode, Visitable() {
     override val id: NodeId = AstNode.getId()
 
     override fun checkNode(
@@ -21,9 +19,6 @@ class StatementAST(
         semanticErrorListener: SemanticErrorListener,
         scope: SymbolTableInterface
     ) {
-    }
-
-    override fun toString(): String {
-        return "statement $id"
+        TODO("Not yet implemented")
     }
 }

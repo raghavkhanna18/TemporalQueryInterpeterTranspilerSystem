@@ -5,15 +5,7 @@ import tsql.ast.symbol_table.SymbolTableInterface
 import tsql.error.SemanticErrorListener
 import tsql.error.SyntaxErrorListener
 
-class StatementAST(
-    override val position: Pair<Pair<Int, Int>, Pair<Int, Int>>,
-    selectAST: SelectAST,
-    DataSourceAST: DataSourceI,
-    whereOperationAST: WhereOperationAST,
-    modalOperationAST: ModalOperationAST,
-    atOperationAST: AtOperationAST
-) : AstNode,
-    Visitable() {
+class ComparatorAST(override val position: Pair<Pair<Int, Int>, Pair<Int, Int>>) : AstNode, Visitable() {
     override val id: NodeId = AstNode.getId()
 
     override fun checkNode(
@@ -21,9 +13,6 @@ class StatementAST(
         semanticErrorListener: SemanticErrorListener,
         scope: SymbolTableInterface
     ) {
-    }
-
-    override fun toString(): String {
-        return "statement $id"
+        TODO("Not yet implemented")
     }
 }

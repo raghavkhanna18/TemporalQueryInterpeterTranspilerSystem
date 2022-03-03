@@ -80,15 +80,15 @@ options {
 
 
 literal_value:
-    NUMERIC_LITERAL
-    | STRING_LITERAL
-    | BLOB_LITERAL
-    | NULL_
-    | TRUE_
-    | FALSE_
-    | CURRENT_TIME_
-    | CURRENT_DATE_
-    | CURRENT_TIMESTAMP_
+    NUMERIC_LITERAL                         # lit_num
+    | STRING_LITERAL                        # lit_string
+    | BLOB_LITERAL                          # lit_blob
+    | NULL_                                 # lit_null
+    | TRUE_                                 # lit_true
+    | FALSE_                                # lit_false
+    | CURRENT_TIME_                         # lit_current_time
+    | CURRENT_DATE_                         # lit_current_date
+    | CURRENT_TIMESTAMP_                    # lit_current_timestamp
 ;
 //
 //
@@ -307,7 +307,7 @@ name:
 //;
 
 table_name:
-    any_name
+    IDENTIFIER
 ;
 
 //table_or_index_name:
@@ -405,44 +405,90 @@ select_operator:
  SELECT_ (DISTINCT_ | ALL_)? attribute_list;
 
 attribute:
-    IDENTIFIER;
+    IDENTIFIER                                      # attri_identifier
+    | STAR                                          # attri_star
+    | IDENTIFIER as_operation                       # attrie_as
+    | table_name DOT IDENTIFIER                     # attri_table_dot_ident
+    | table_name DOT STAR                           # attri_table_dot_star
+    | table_name DOT IDENTIFIER as_operation        # attri_table_dot_ident_as
+    ;
 
 as_operation:
     AS_ STRING_LITERAL;
 
 attribute_list:
-    STAR | attribute as_operation| attribute | attribute_list COMMA attribute_list ;
+     attribute (COMMA attribute)*;
 
 comparator :
-    LT | LT_EQ | GT | GT_EQ | EQ | NOT_EQ1 | NOT_EQ2 | ASSIGN | EQ;
+    LT                                                  # lt
+    | LT_EQ                                             # lt_eq
+    | GT                                                # gt
+    | GT_EQ                                             # gt_eq
+    | EQ                                                # eq
+    | NOT_EQ1                                           # not_eq_1
+    | NOT_EQ2                                           # not_eq_2
+    | ASSIGN                                            # eq_2
+    ;
 where_expresion:
-    (attribute | literal_value) comparator (attribute | literal_value);
+      attribute  comparator attribute                   # where_aca
+    | attribute comparator literal_value                # where_acl
+    | literal_value comparator literal_value            # where_lcl
+    | literal_value comparator attribute                # where_lca
+    ;
 
 where_operation:
-    WHERE_ where_expresion ((AND_ | OR_) where_expresion)?;
+      WHERE_ where_expresion ( AND_ where_expresion)*   # where_op_and
+    | WHERE_ where_expresion ( OR_ where_expresion)*    # where_op_or
+    ;
 
 at_operation:
     AT_ literal_value;
 
-binary_operator:
-    UNION_ | MINUS | TIMES_ | SINCE_ | UNTIL_ | join_operator;
-table:
-    table_name as_operation | table_name;
+join_operation:
+    join_operator ON_ attribute ASSIGN attribute;
 
+binary_operator:
+      TIMES_                                             # binop_times
+    | SINCE_                                             # binop_since
+    | UNTIL_                                             # binop_until
+    | join_operation                                     # binop_join
+    ;
+
+
+binary_statement_operator:
+      UNION_                                             # binop_stat_union
+    | MINUS                                              # binop_stat_minus
+    ;
+
+table:
+    table_name as_operation | table_name ;
+
+//binary_operation:
+//    OPEN_PAR statement CLOSE_PAR binary_operator (OPEN_PAR statement CLOSE_PAR | table) | table binary_operator (table | OPEN_PAR statement CLOSE_PAR) ;
 binary_operation:
-    OPEN_PAR statement CLOSE_PAR binary_operator (OPEN_PAR statement CLOSE_PAR | table) | table binary_operator (table | OPEN_PAR statement CLOSE_PAR) ;
+        table binary_operator table                                  # binopn_table_with_table
+      | table binary_operator binary_operation                       # binopn_table_with_binopn
+    ;
+
 
 modal_operation:
     modal_operator;
 
 modal_operator:
-    PAST_ | PREVIOUS_ | ALWAYS_ PAST_ | FUTURE_ | NEXT_ | ALWAYS_ FUTURE_;
-
+      PAST_                                             # modal_past
+    | PREVIOUS_                                         # modal_previous
+    | ALWAYS_ PAST_                                     # modal_always_past
+    | FUTURE_                                           # modal_future
+    | NEXT_                                             # modal_next
+    | ALWAYS_ FUTURE_                                   # modal_always_future
+;
 coalesce_statement:
     COALESCE? statement;
 
 statement:
-    select_operator FROM_ (table | binary_operation) (where_operation)? (modal_operation)? (at_operation)? SCOL;
+    select_operator FROM_ binary_operation (where_operation)? (modal_operation)? (at_operation)? SCOL           # select_from_bin_opn
+    | select_operator FROM_ table (where_operation)? (modal_operation)? (at_operation)? SCOL                    # select_from_table
+;
 
 program:
     coalesce_statement (coalesce_statement )? EOF;

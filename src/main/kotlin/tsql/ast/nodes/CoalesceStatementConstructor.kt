@@ -12,8 +12,8 @@ class CoalesceStatementConstructor(val syntaxErrorListener: SyntaxErrorListener)
             Pair(
                 Pair(ctx.COALESCE().symbol.line, ctx.COALESCE().symbol.charPositionInLine),
                 Pair(
-                    ctx.statement().SCOL().symbol.line,
-                    ctx.statement().SCOL().symbol.charPositionInLine + ctx.statement().SCOL().symbol.text.length
+                    ctx.statement().stop.line,
+                    ctx.statement().start.charPositionInLine
                 )
             ),
             ctx.statement().accept(StatementConstructor(syntaxErrorListener))
