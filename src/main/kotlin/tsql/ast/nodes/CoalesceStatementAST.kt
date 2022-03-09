@@ -6,7 +6,7 @@ import tsql.error.SemanticErrorListener
 import tsql.error.SyntaxErrorListener
 
 class CoalesceStatementAST(
-    override val position: Pair<Pair<Int, Int>, Pair<Int, Int>>,
+    // override val position: Pair<Pair<Int, Int>, Pair<Int, Int>>,
     val statementAST: StatementAST
 ) : AstNode,
     Visitable() {

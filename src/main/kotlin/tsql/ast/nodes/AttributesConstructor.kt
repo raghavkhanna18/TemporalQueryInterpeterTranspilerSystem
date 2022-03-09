@@ -14,10 +14,10 @@ class AttributesConstructor(val syntaxErrorListener: SyntaxErrorListener) : TSQL
             )
         }
         return AttributesAST(
-            Pair(
-                Pair(ctx.start.line, ctx.start.charPositionInLine),
-                Pair(ctx.stop.line, ctx.stop.charPositionInLine + ctx.stop.text.length)
-            ),
+            // Pair(
+            //     Pair(ctx.start.line, ctx.start.charPositionInLine),
+            //     Pair(ctx.stop.line, ctx.stop.charPositionInLine + ctx.stop.text.length)
+            // ),
             attributes
         )
     }

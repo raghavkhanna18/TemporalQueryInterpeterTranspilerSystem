@@ -5,9 +5,12 @@ import antlr.TSQLParser
 import org.antlr.v4.runtime.BufferedTokenStream
 import org.antlr.v4.runtime.CharStream
 import org.antlr.v4.runtime.CharStreams
+import org.antlr.v4.runtime.Parser
+import org.antlr.v4.runtime.ParserRuleContext
+import org.antlr.v4.runtime.tree.ParseTree
+import org.antlr.v4.runtime.tree.Trees
 import tsql.ast.nodes.ProgramAST
 import tsql.ast.nodes.ProgramConstructor
-
 import tsql.ast.symbol_table.TopLevelSymbolTable
 import tsql.error.ErrorAccumulator
 import tsql.error.SemanticErrorListener
@@ -16,7 +19,10 @@ import tsql.error.SyntaxErrorListener
 typealias TSQLParseTree = TSQLParser.ProgramContext
 
 fun buildCST(parser: TSQLParser): TSQLParseTree {
-    return parser.program()
+    val root: ParseTree = parser.program()
+    println(printSyntaxTree(parser, root))
+
+    return root as TSQLParseTree
 }
 
 fun buildAST(parseTree: TSQLParseTree, syntaxErrorListener: SyntaxErrorListener): ProgramAST {
@@ -44,8 +50,8 @@ fun constructParser(syntaxErrorListener: SyntaxErrorListener, charStream: CharSt
     return parser
 }
 
-fun constructAndCreateAST(syntaxErrorAccumulator: ErrorAccumulator, semanticErrorAccumulator: ErrorAccumulator, filename: String): ProgramAST {
-    val charStream = CharStreams.fromFileName(filename)
+fun constructAndCreateAST(syntaxErrorAccumulator: ErrorAccumulator, semanticErrorAccumulator: ErrorAccumulator, input: String): ProgramAST {
+    val charStream = CharStreams.fromString(input)
     return createAST(syntaxErrorAccumulator, semanticErrorAccumulator, charStream)
 }
 
@@ -72,6 +78,27 @@ private fun createAST(
 
     // Perform semantic analysis
     val topLevelSymbolTable = TopLevelSymbolTable()
-    absSynTree.checkNode(syntaxErrorListener, semanticErrorListener, topLevelSymbolTable)
+    // absSynTree.checkNode(syntaxErrorListener, semanticErrorListener, topLevelSymbolTable)
         return absSynTree
     }
+
+fun printSyntaxTree(parser: Parser, root: ParseTree): String? {
+    val buf = StringBuilder()
+    recursive(root, buf, 0, parser.getRuleNames().asList())
+    return buf.toString()
+}
+
+private fun recursive(aRoot: ParseTree, buf: StringBuilder, offset: Int, ruleNames: List<String>) {
+    for (i in 0 until offset) {
+        buf.append("  ")
+    }
+    buf.append(Trees.getNodeText(aRoot, ruleNames)).append("\n")
+    if (aRoot is ParserRuleContext) {
+        val prc = aRoot as ParserRuleContext
+        if (prc.children != null) {
+            for (child in prc.children) {
+                recursive(child, buf, offset + 1, ruleNames)
+            }
+        }
+    }
+}

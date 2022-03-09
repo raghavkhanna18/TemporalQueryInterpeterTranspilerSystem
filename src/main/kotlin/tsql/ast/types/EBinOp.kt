@@ -10,5 +10,5 @@ enum class EBinOp(val repr: String) {
     LESS("<"),
     LESS_EQUAL("<="),
     NOT_EQUAL("!="),
-    OR("ORT"),
+    OR("OR"),
 }

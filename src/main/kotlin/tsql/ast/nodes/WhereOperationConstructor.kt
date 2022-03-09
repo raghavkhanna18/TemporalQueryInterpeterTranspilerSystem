@@ -12,11 +12,15 @@ class WhereOperationConstructor(val syntaxErrorListener: SyntaxErrorListener) : 
             whereExpressions.add(expr.accept(WhereExpressionConstructor(syntaxErrorListener)))
         }
         return WhereOperationAST(
-            Pair(
-                Pair(ctx.WHERE_().symbol.line, ctx.WHERE_().symbol.charPositionInLine),
-                Pair(ctx.stop.line, ctx.stop.charPositionInLine + ctx.stop.text.length)
-            ),
+            // Pair(
+            //     Pair(ctx.WHERE_().symbol.line, ctx.WHERE_().symbol.charPositionInLine),
+            //     Pair(ctx.stop.line, ctx.stop.charPositionInLine + ctx.stop.text.length)
+            // ),
             whereExpressions
         )
+    }
+
+    override fun visitWhere_op_or(ctx: TSQLParser.Where_op_orContext?): WhereOperationAST {
+        return super.visitWhere_op_or(ctx)
     }
 }

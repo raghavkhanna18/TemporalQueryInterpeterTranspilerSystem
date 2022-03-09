@@ -1,6 +1,6 @@
 package tsql.ast.types
 
-// All types in wacc language.
+// All types in TSQL language.
 enum class EType {
     INT, BOOL, STRING, DATE,
     UNKNOWN, NULL, STATEMENT, ERROR,

@@ -139,8 +139,12 @@ literal_value:
 //;
 //
 join_operator:
-    COMMA
-    | NATURAL_? (LEFT_ OUTER_? | INNER_ | CROSS_ | SINCE_ | UNTIL_)? JOIN_
+LEFT_ OUTER_? JOIN_                     # left_join
+| RIGHT_ OUTER_? JOIN_                  # right_join
+| INNER_ JOIN_                          # inner_join
+| CROSS_ JOIN_                          # cross_join
+| SINCE_ JOIN_                          # since_join
+| UNTIL_ JOIN_                          # until_join
 ;
 //
 //join_constraint:
@@ -294,9 +298,9 @@ keyword:
 
 // TODO: check all names below
 
-name:
-    any_name
-;
+//name:
+//    any_name
+//;
 
 //function_name:
 //    any_name
@@ -318,9 +322,9 @@ table_name:
 //    any_name
 //;
 
-column_name:
-    any_name
-;
+//column_name:
+//    any_name
+//;
 
 //collation_name:
 //    any_name
@@ -390,12 +394,12 @@ column_name:
 //    any_name
 //;
 //
-any_name:
-    IDENTIFIER
-    | keyword
-    | STRING_LITERAL
-    | OPEN_PAR any_name CLOSE_PAR
-;
+//any_name:
+//    IDENTIFIER
+//    | keyword
+//    | STRING_LITERAL
+//    | OPEN_PAR any_name CLOSE_PAR
+//;
 
 
 unary_operatoion:
@@ -461,7 +465,9 @@ binary_statement_operator:
     ;
 
 table:
-    table_name as_operation | table_name ;
+    table_name as_operation                             # table_as
+    | table_name                                        # table_not_renamed
+    ;
 
 //binary_operation:
 //    OPEN_PAR statement CLOSE_PAR binary_operator (OPEN_PAR statement CLOSE_PAR | table) | table binary_operator (table | OPEN_PAR statement CLOSE_PAR) ;
@@ -486,9 +492,10 @@ coalesce_statement:
     COALESCE? statement;
 
 statement:
-    select_operator FROM_ binary_operation (where_operation)? (modal_operation)? (at_operation)? SCOL           # select_from_bin_opn
-    | select_operator FROM_ table (where_operation)? (modal_operation)? (at_operation)? SCOL                    # select_from_table
+    select_operator FROM_ table (where_operation)? (modal_operation)? (at_operation)? SCOL                    # select_from_table
+    | select_operator FROM_ binary_operation (where_operation)? (modal_operation)? (at_operation)? SCOL           # select_from_bin_opn
+
 ;
 
 program:
-    coalesce_statement (coalesce_statement )? EOF;
+    coalesce_statement+ EOF;

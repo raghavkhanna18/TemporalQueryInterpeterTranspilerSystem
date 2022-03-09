@@ -6,12 +6,12 @@ import tsql.error.SemanticErrorListener
 import tsql.error.SyntaxErrorListener
 
 class StatementAST(
-    override val position: Pair<Pair<Int, Int>, Pair<Int, Int>>,
+    // override val position: Pair<Pair<Int, Int>, Pair<Int, Int>>,
     selectAST: SelectAST,
     DataSourceAST: DataSourceI,
-    whereOperationAST: WhereOperationAST,
-    modalOperationAST: ModalOperationAST,
-    atOperationAST: AtOperationAST
+    whereOperationAST: WhereOperationAST?,
+    modalOperationAST: ModalOperationAST?,
+    atOperationAST: AtOperationAST?
 ) : AstNode,
     Visitable() {
     override val id: NodeId = AstNode.getId()

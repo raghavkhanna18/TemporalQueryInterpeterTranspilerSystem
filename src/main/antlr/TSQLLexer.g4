@@ -84,6 +84,13 @@ LAST_:              'LAST';
 SINCE_:             'SINCE';
 UNTIL_:             'UNTIL';
 COALESCE:           'COALESCE';
+PAST_: 'PAST';
+PREVIOUS_: 'PREVIOUS';
+ALWAYS_: 'ALWAYS';
+FUTURE_: 'FUTURE';
+NEXT_: 'NEXT';
+TIMES_: 'TIMES';
+AT_: 'AT';
 
 IDENTIFIER:
     '"' (~'"' | '""')* '"'
@@ -104,17 +111,11 @@ SINGLE_LINE_COMMENT: '--' ~[\r\n]* (('\r'? '\n') | EOF) -> channel(HIDDEN);
 
 MULTILINE_COMMENT: '/*' .*? '*/' -> channel(HIDDEN);
 
-SPACES: [ \u000B\t\r\n] -> channel(HIDDEN);
+SPACES: [ \u000B\t\r\n] -> skip;
 
 UNEXPECTED_CHAR: .;
 
-PAST_: 'PAST';
-PREVIOUS_: 'PREVIOUS';
-ALWAYS_: 'ALWAYS';
-FUTURE_: 'FUTURE';
-NEXT_: 'NEXT';
-TIMES_: 'TIMES';
-AT_: 'AT';
+
 
 fragment HEX_DIGIT: [0-9A-F];
 fragment DIGIT:     [0-9];

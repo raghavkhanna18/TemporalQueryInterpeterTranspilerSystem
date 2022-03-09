@@ -2,10 +2,14 @@ package tsql.ast.nodes
 
 import tsql.ast.nodes.visitor.Visitable
 import tsql.ast.symbol_table.SymbolTableInterface
+import tsql.ast.types.EBinOp
 import tsql.error.SemanticErrorListener
 import tsql.error.SyntaxErrorListener
 
-class ComparatorAST(override val position: Pair<Pair<Int, Int>, Pair<Int, Int>>) : AstNode, Visitable() {
+class ComparatorAST(
+    // override val position: Pair<Pair<Int, Int>, Pair<Int, Int>>
+    comparator: EBinOp
+    ) : AstNode, Visitable() {
     override val id: NodeId = AstNode.getId()
 
     override fun checkNode(

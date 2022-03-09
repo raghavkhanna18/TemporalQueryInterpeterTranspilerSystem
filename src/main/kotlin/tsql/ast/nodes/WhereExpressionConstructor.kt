@@ -12,10 +12,10 @@ class WhereExpressionConstructor(val syntaxErrorListener: SyntaxErrorListener) :
         val rhs = ctx.attribute().last().accept(AttributeConstructor(syntaxErrorListener))
         val comparator = ctx.comparator().accept(ComparatorConstructor(syntaxErrorListener))
         return WhereExpressionAST(
-            Pair(
-                Pair(ctx.start.line, ctx.start.charPositionInLine),
-                Pair(ctx.stop.line, ctx.stop.charPositionInLine + ctx.stop.text.length)
-            ),
+            // Pair(
+            //     Pair(ctx.start.line, ctx.start.charPositionInLine),
+            //     Pair(ctx.stop.line, ctx.stop.charPositionInLine + ctx.stop.text.length)
+            // ),
             lhs = lhs,
             rhs = rhs,
             comparator = comparator
@@ -27,10 +27,10 @@ class WhereExpressionConstructor(val syntaxErrorListener: SyntaxErrorListener) :
         val rhs = ctx.literal_value().accept(LiteralValueConstructor(syntaxErrorListener))
         val comparator = ctx.comparator().accept(ComparatorConstructor(syntaxErrorListener))
         return WhereExpressionAST(
-            Pair(
-                Pair(ctx.start.line, ctx.start.charPositionInLine),
-                Pair(ctx.stop.line, ctx.stop.charPositionInLine + ctx.stop.text.length)
-            ),
+            // Pair(
+            //     Pair(ctx.start.line, ctx.start.charPositionInLine),
+            //     Pair(ctx.stop.line, ctx.stop.charPositionInLine + ctx.stop.text.length)
+            // ),
             lhs = lhs,
             rhs = rhs,
             comparator = comparator
