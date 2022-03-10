@@ -23,7 +23,7 @@ class ProgramConstructor(val syntaxErrorListener: SyntaxErrorListener) : TSQLPar
                 program.statementList.add(
                     statement.accept(CoalesceStatementConstructor(syntaxErrorListener)))
             } catch (e: Exception) {
-                println(e)
+                e.printStackTrace()
             }
         }
         return program

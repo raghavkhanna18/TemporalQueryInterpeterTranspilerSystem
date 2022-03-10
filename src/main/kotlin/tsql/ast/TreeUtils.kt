@@ -21,7 +21,7 @@ typealias TSQLParseTree = TSQLParser.ProgramContext
 fun buildCST(parser: TSQLParser): TSQLParseTree {
     val root: ParseTree = parser.program()
     println(printSyntaxTree(parser, root))
-
+    println("test")
     return root as TSQLParseTree
 }
 

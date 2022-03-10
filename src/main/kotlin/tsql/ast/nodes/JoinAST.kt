@@ -8,9 +8,12 @@ import tsql.error.SyntaxErrorListener
 
 class JoinAST(
     // override val position: Pair<Pair<Int, Int>, Pair<Int, Int>>,
-    joinType: JoinType,
-    left: AttributeAST,
-    right: AttributeAST
+    val joinType: JoinType,
+    val left: DataSourceI,
+    val right: DataSourceI,
+    val leftAttributeAST: AttributeAST,
+    val rightAttributeAST: AttributeAST
+
 ) : AstNode, Visitable(), DataSourceI {
     override val id: NodeId = AstNode.getId()
 

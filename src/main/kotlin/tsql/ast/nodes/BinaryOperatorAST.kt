@@ -7,7 +7,9 @@ import tsql.error.SyntaxErrorListener
 
 class BinaryOperatorAST(
     // override val position: Pair<Pair<Int, Int>, Pair<Int, Int>>,
-    dataSource: DataSourceI) : AstNode, Visitable() {
+    operator: DataSourceI,
+    val lhs: DataSourceI,
+    val rhs: DataSourceI) : AstNode, Visitable() {
     override val id: NodeId = AstNode.getId()
     override fun checkNode(
         syntaxErrorListener: SyntaxErrorListener,

@@ -441,21 +441,21 @@ where_expresion:
     ;
 
 where_operation:
-      WHERE_ where_expresion ( AND_ where_expresion)*   # where_op_and
-    | WHERE_ where_expresion ( OR_ where_expresion)*    # where_op_or
+      where_expresion AND_ where_operation            # where_op_and
+    | where_expresion OR_  where_operation            # where_op_or
+    | where_expresion                                 # where_single
     ;
 
 at_operation:
     AT_ literal_value;
 
 join_operation:
-    join_operator ON_ attribute ASSIGN attribute;
+    table join_operator table ON_ attribute ASSIGN attribute;
 
 binary_operator:
       TIMES_                                             # binop_times
     | SINCE_                                             # binop_since
     | UNTIL_                                             # binop_until
-    | join_operation                                     # binop_join
     ;
 
 
@@ -472,9 +472,10 @@ table:
 //binary_operation:
 //    OPEN_PAR statement CLOSE_PAR binary_operator (OPEN_PAR statement CLOSE_PAR | table) | table binary_operator (table | OPEN_PAR statement CLOSE_PAR) ;
 binary_operation:
-        table binary_operator table                                  # binopn_table_with_table
-      | table binary_operator binary_operation                       # binopn_table_with_binopn
-    ;
+        table binary_operator table                                     # binopn_table_with_table
+        | table binary_operator binary_operation                        # binopn_table_with_binopn
+;
+
 
 
 modal_operation:
@@ -492,8 +493,9 @@ coalesce_statement:
     COALESCE? statement;
 
 statement:
-    select_operator FROM_ table (where_operation)? (modal_operation)? (at_operation)? SCOL                    # select_from_table
-    | select_operator FROM_ binary_operation (where_operation)? (modal_operation)? (at_operation)? SCOL           # select_from_bin_opn
+    select_operator FROM_ table (where_operation)? (modal_operation)? (at_operation)? SCOL                          # select_from_table
+    | select_operator FROM_ binary_operation (where_operation)? (modal_operation)? (at_operation)? SCOL             # select_from_bin_opn
+    | select_operator FROM_ join_operation ( WHERE_ where_operation)? (modal_operation)? (at_operation)? SCOL               # select_from_join
 
 ;
 

@@ -19,7 +19,6 @@ class BinaryOperationConstructor(val syntaxErrorListener: SyntaxErrorListener) :
     }
 
     override fun visitBinopn_table_with_binopn(ctx: TSQLParser.Binopn_table_with_binopnContext): BinaryOperationAST {
-        ctx.binary_operation().accept(BinaryOperationConstructor(syntaxErrorListener))
         return BinaryOperationAST(
             // Pair(
             //     Pair(ctx.start.line, ctx.start.charPositionInLine),

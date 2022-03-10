@@ -11,6 +11,8 @@ class JoinConstructor(val syntaxErrorListener: SyntaxErrorListener) : TSQLParser
             //     Pair(ctx.start.line, ctx.start.charPositionInLine), Pair(ctx.stop.line, ctx.stop.charPositionInLine)
             // ),
             ctx.join_operator().accept(JoinOperatorConstructor(syntaxErrorListener)),
+            ctx.table().first().accept(TableConstructor(syntaxErrorListener)),
+            ctx.table().last().accept(TableConstructor(syntaxErrorListener)),
             ctx.attribute().first().accept(AttributeConstructor(syntaxErrorListener)),
             ctx.attribute().last().accept(AttributeConstructor(syntaxErrorListener))
         )

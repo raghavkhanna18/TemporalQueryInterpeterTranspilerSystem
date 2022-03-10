@@ -25,7 +25,7 @@ fun main(args: Array<String>) = mainBody {
     //         verbose = verbose
     //     )
     // }
-    val input = "SELECT a, b FROM t WHERE a = 1 at 2;"
+    val input = "SELECT t.a, t.b FROM t SINCE JOIN z ON t.a = z.b WHERE a = 1 and b < c at 2;"
     val syntaxErrorAccumulator = ErrorAccumulator(
         Constants.SYNTAX_EXIT_CODE,
         CommonErrorPrinter(arrayOf( input))
