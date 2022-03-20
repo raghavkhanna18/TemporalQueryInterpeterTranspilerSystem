@@ -19,6 +19,10 @@ class CoalesceStatementAST(
     ) {
     }
 
+    override fun execute(dataSourceI: DataSourceI?): DataSourceI {
+        TODO("Not yet implemented")
+    }
+
     override fun toString(): String {
         return "coalesce statement $id"
     }

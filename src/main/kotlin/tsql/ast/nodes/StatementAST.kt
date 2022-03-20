@@ -23,6 +23,10 @@ class StatementAST(
     ) {
     }
 
+    override fun execute(dataSourceI: DataSourceI?): DataSourceI {
+        TODO("Not yet implemented")
+    }
+
     override fun toString(): String {
         return "statement $id"
     }

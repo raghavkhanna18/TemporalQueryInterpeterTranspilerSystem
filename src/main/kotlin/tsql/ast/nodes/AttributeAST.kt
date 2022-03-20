@@ -8,11 +8,11 @@ import tsql.error.SyntaxErrorListener
 
 open class AttributeAST(
     // override val position: Pair<Pair<Int, Int>, Pair<Int, Int>>,
-    value: String,
-    isLiteral: Boolean = false,
-    tableName:String = "unknown",
-    rename: String = value,
-    type: EType = EType.STRING
+    val value: String,
+    val isLiteral: Boolean = false,
+    val tableName: String = "",
+    val rename: String = value,
+    val type: EType = EType.STRING
 ) : AstNode,
     Visitable() {
     override val id: NodeId = AstNode.getId()
@@ -22,5 +22,13 @@ open class AttributeAST(
         scope: SymbolTableInterface
     ) {
         TODO("Not yet implemented")
+    }
+
+    override fun execute(dataSourceI: DataSourceI?): DataSourceI {
+        TODO("Not yet implemented")
+    }
+
+    fun getColumnName(): String {
+        if (tableName != "") return value else return "$tableName.$value"
     }
 }

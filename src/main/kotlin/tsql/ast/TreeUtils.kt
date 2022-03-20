@@ -55,10 +55,6 @@ fun constructAndCreateAST(syntaxErrorAccumulator: ErrorAccumulator, semanticErro
     return createAST(syntaxErrorAccumulator, semanticErrorAccumulator, charStream)
 }
 
-fun constructAndCreateASTFromContents(syntaxErrorAccumulator: ErrorAccumulator, semanticErrorAccumulator: ErrorAccumulator, fileContents: String): ProgramAST {
-    val charStream = CharStreams.fromString(fileContents)
-    return createAST(syntaxErrorAccumulator, semanticErrorAccumulator, charStream)
-}
 
 private fun createAST(
     syntaxErrorAccumulator: ErrorAccumulator,

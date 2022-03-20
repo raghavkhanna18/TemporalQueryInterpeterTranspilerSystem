@@ -1,3 +1,7 @@
 package tsql.ast.nodes
 
-class CoalesceConstructor
+import antlr.TSQLParserBaseVisitor
+
+class CoalesceConstructor : TSQLParserBaseVisitor<CoalesceAST>() {
+
+}

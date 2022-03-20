@@ -22,6 +22,10 @@ class WhereOperationAST(
         TODO("Not yet implemented")
     }
 
+    override fun execute(dataSourceI: DataSourceI?): DataSourceI {
+        TODO("Not yet implemented")
+    }
+
     fun flatten(): Pair<MutableCollection<EBinOp>, MutableCollection<WhereExpressionAST>> {
         if (rhs != null && conjuction != null) {
             val flat_rhs = rhs.flatten()

@@ -10,33 +10,16 @@ class TableConstructor(syntaxErrorListener: SyntaxErrorListener): TSQLParserBase
     override fun visitTable_as(ctx: TSQLParser.Table_asContext): TableAST {
 
         return TableAST(
-            // Pair(
-            //     Pair(
-            //         ctx.table_name().start.line,
-            //         ctx.table_name().start.charPositionInLine
-            //     ),
-            //     Pair(
-            //         ctx.table_name().stop.line,
-            //         ctx.table_name().stop.charPositionInLine + ctx.table_name().stop.text.length
-            //     )
-            // ),
+            ctx.table_name().IDENTIFIER().symbol.text,
             ctx.as_operation().STRING_LITERAL().symbol.text
         )
     }
 
-    override fun visitTable_not_renamed(ctx: TSQLParser.Table_not_renamedContext?): TableAST {
+    override fun visitTable_not_renamed(ctx: TSQLParser.Table_not_renamedContext): TableAST {
 
         return TableAST(
-            // Pair(
-            //     Pair(
-            //         ctx.table_name().start.line,
-            //         ctx.table_name().start.charPositionInLine
-            //     ),
-            //     Pair(
-            //         ctx.table_name().stop.line,
-            //         ctx.table_name().stop.charPositionInLine + ctx.table_name().stop.text.length
-            //     )
-            // )
+            ctx.table_name().IDENTIFIER().symbol.text,
+            ctx.table_name().IDENTIFIER().symbol.text
         )
     }
 }

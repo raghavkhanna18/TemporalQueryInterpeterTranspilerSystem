@@ -18,8 +18,7 @@ class ErrorAccumulator(val exitCode: Int, val errorPrinter: ErrorPrinter) {
 
     fun throwErrorsAndReturnExitCode(): Int {
         if (errors.isNotEmpty()) {
-            errors.sortedBy(CompileError::line)
-                .forEach {
+            errors.forEach {
                 errorPrinter.printError(it)
             }
             println("Exit code $exitCode")
