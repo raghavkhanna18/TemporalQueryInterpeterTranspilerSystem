@@ -8,7 +8,7 @@ import tsql.error.SyntaxErrorListener
 
 class ComparatorAST(
     // override val position: Pair<Pair<Int, Int>, Pair<Int, Int>>
-    comparator: EBinOp
+    val comparator: EBinOp
     ) : AstNode, Visitable() {
     override val id: NodeId = AstNode.getId()
 
@@ -20,7 +20,7 @@ class ComparatorAST(
         TODO("Not yet implemented")
     }
 
-    override fun execute(dataSourceI: DataSourceI?): DataSourceI {
-        TODO("Not yet implemented")
+    override fun execute(dataSourceI: DataSourceI?): DataSourceI? {
+        return dataSourceI
     }
 }

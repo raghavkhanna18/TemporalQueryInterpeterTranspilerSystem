@@ -20,7 +20,7 @@ class SelectAST(
         TODO("Not yet implemented")
     }
 
-    override fun execute(dataSourceI: DataSourceI?): DataSourceI {
+    override fun execute(dataSourceI: DataSourceI?): DataSourceI? {
         if (dataSourceI != null) {
             dataSourceI.project(columns = getColumnNames())
             return dataSourceI

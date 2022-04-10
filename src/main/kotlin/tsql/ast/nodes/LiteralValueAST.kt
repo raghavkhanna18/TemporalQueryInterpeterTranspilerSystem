@@ -11,7 +11,7 @@ class LiteralValueAST (
     AttributeAST(
         // position = position,
         value= value, isLiteral = true, type=type) {
-    override fun execute(dataSourceI: DataSourceI?): DataSourceI {
+    override fun execute(dataSourceI: DataSourceI?): DataSourceI? {
         return super.execute(dataSourceI)
     }
 

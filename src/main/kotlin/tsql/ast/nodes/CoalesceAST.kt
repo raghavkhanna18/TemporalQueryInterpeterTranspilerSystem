@@ -1,7 +1,5 @@
 package tsql.ast.nodes
 
-import antlr.TSQLParser
-import antlr.TSQLParserBaseVisitor
 import tsql.ast.nodes.visitor.Visitable
 import tsql.ast.symbol_table.SymbolTableInterface
 import tsql.error.SemanticErrorListener
@@ -21,7 +19,7 @@ class CoalesceAST : AstNode, Visitable() {
         TODO("Not yet implemented")
     }
 
-    override fun execute(dataSourceI: DataSourceI?): DataSourceI {
+    override fun execute(dataSourceI: DataSourceI?): DataSourceI? {
         TODO("Not yet implemented")
     }
 }

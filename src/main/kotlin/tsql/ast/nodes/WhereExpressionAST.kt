@@ -2,7 +2,7 @@ package tsql.ast.nodes
 
 import tsql.ast.nodes.visitor.Visitable
 import tsql.ast.symbol_table.SymbolTableInterface
-import tsql.ast.types.EBinOp
+import tsql.database.Condition
 import tsql.error.SemanticErrorListener
 import tsql.error.SyntaxErrorListener
 
@@ -22,7 +22,11 @@ class WhereExpressionAST (
         TODO("Not yet implemented")
     }
 
-    override fun execute(dataSourceI: DataSourceI?): DataSourceI {
+    override fun execute(dataSourceI: DataSourceI?): DataSourceI? {
         TODO("Not yet implemented")
+    }
+
+    fun toCondition(): Condition {
+        return Condition(lhs.value, lhs.type, lhs.isLiteral, comparator.comparator, rhs.value, rhs.type, rhs.isLiteral)
     }
 }

@@ -18,7 +18,7 @@ interface AstNode {
         scope: SymbolTableInterface
     )
 
-    fun execute(dataSourceI: DataSourceI? = null) : DataSourceI
+    fun execute(dataSourceI: DataSourceI? = null): DataSourceI?
 
     companion object {
         private var id = 0

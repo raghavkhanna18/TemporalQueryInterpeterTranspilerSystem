@@ -23,7 +23,7 @@ class StatementAST(
     ) {
     }
 
-    override fun execute(dataSourceI: DataSourceI?): DataSourceI {
+    override fun execute(dataSourceI: DataSourceI?): DataSourceI? {
         TODO("Not yet implemented")
     }
 

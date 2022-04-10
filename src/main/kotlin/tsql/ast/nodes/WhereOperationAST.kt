@@ -3,6 +3,8 @@ package tsql.ast.nodes
 import tsql.ast.nodes.visitor.Visitable
 import tsql.ast.symbol_table.SymbolTableInterface
 import tsql.ast.types.EBinOp
+import tsql.database.Condition
+import tsql.database.Table
 import tsql.error.SemanticErrorListener
 import tsql.error.SyntaxErrorListener
 
@@ -22,17 +24,26 @@ class WhereOperationAST(
         TODO("Not yet implemented")
     }
 
-    override fun execute(dataSourceI: DataSourceI?): DataSourceI {
-        TODO("Not yet implemented")
+    override fun execute(dataSourceI: DataSourceI?): DataSourceI? {
+        if (dataSourceI == null) {
+            return dataSourceI
+        }
+        val conditions = this.flatten()
+        when(dataSourceI){
+            is Table -> {
+                dataSourceI.filter(conditions)
+            }
+        }
+        return dataSourceI
     }
 
-    fun flatten(): Pair<MutableCollection<EBinOp>, MutableCollection<WhereExpressionAST>> {
+    fun flatten(): Pair<MutableList<EBinOp>, MutableList<Condition>> {
         if (rhs != null && conjuction != null) {
             val flat_rhs = rhs.flatten()
             flat_rhs.first.add(conjuction)
-            flat_rhs.second.add(lhs)
+            flat_rhs.second.add(lhs.toCondition())
             return Pair(flat_rhs.first, flat_rhs.second)
         }
-        return Pair(mutableListOf(), mutableListOf(lhs))
+        return Pair(mutableListOf(), mutableListOf(lhs.toCondition()))
     }
 }

@@ -16,7 +16,7 @@ class ConditionAST: AstNode, Visitable() {
         TODO("Not yet implemented")
     }
 
-    override fun execute(dataSourceI: DataSourceI?): DataSourceI {
+    override fun execute(dataSourceI: DataSourceI?): DataSourceI? {
         TODO("Not yet implemented")
     }
 }
