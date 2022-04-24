@@ -1,5 +1,9 @@
 package tsql.ast.nodes
 
+import tsql.Constants
+import tsql.Utils.MAX_TIME
+import tsql.Utils.MIN_TIME
+import tsql.Utils.TIME_UNITS
 import tsql.ast.nodes.visitor.Visitable
 import tsql.ast.symbol_table.SymbolTableInterface
 import tsql.ast.types.EBinOp
@@ -7,9 +11,11 @@ import tsql.ast.types.EType
 import tsql.ast.types.JoinType
 import tsql.database.Row
 import tsql.database.Table
+import tsql.decrementTime
 import tsql.error.SemanticError
 import tsql.error.SemanticErrorListener
 import tsql.error.SyntaxErrorListener
+import tsql.incrementTime
 import kotlin.math.max
 import kotlin.math.min
 
@@ -23,8 +29,8 @@ class JoinAST(
 
 ) : AstNode, Visitable(), DataSourceI {
     override val id: NodeId = AstNode.getId()
-    val maxTime = Long.MAX_VALUE
-    val minTime = Long.MIN_VALUE
+    val maxTime = MAX_TIME
+    val minTime = MIN_TIME
     override fun checkNode(
         syntaxErrorListener: SyntaxErrorListener,
         semanticErrorListener: SemanticErrorListener,
@@ -41,11 +47,11 @@ class JoinAST(
         leftType: EType,
         rightType: EType
     ): Table {
-        fun compareLeftRight(comparator: EBinOp): (Row) -> Boolean {
+        fun compareLeftRight(comparator: EBinOp, combinedLeftIndex: Int, combinedRightIndex: Int): (Row) -> Boolean {
             if (leftType == rightType) {
                 return leftTable.convertToFunctionIndexIndex(
-                    leftAttributeIndex,
-                    rightAttributeIndex,
+                    combinedLeftIndex,
+                    combinedRightIndex,
                     comparator,
                     leftType
                 )
@@ -62,15 +68,17 @@ class JoinAST(
 
         var count = 0
         val combinedTable = Table()
-        val combinedColumnNames = leftTable.columnNames.toMutableList()
+        val combinedTableName = "${leftTable.name}_${rightTable.name}"
+        combinedTable.name = combinedTableName
+        val combinedColumnNames = leftTable.columnNames.toMutableList().map { "${leftTable.name}.$it" }.toMutableList()
         // combinedColumnNames.removeAt(leftAttributeIndex)
-        combinedColumnNames.addAll(rightTable.columnNames)
+        combinedColumnNames.addAll(rightTable.columnNames.toMutableList().map { "${rightTable.name}.$it"})
         val combinedColumnTypes = leftTable.columnTypes.toMutableList()
         // combinedColumnTypes.removeAt(leftAttributeIndex)
         combinedColumnTypes.addAll(rightTable.columnTypes)
         combinedTable.columnNames = combinedColumnNames
         combinedTable.columnTypes = combinedColumnTypes
-        combinedTable.numberOfColumns = leftTable.numberOfColumns + rightTable.numberOfColumns - 1
+        combinedTable.numberOfColumns = leftTable.numberOfColumns + rightTable.numberOfColumns
         combinedTable.rows = mutableListOf()
         for (i in 0 until leftTable.rows.size) {
             var j = 0
@@ -82,59 +90,67 @@ class JoinAST(
                 val combinedTempData = leftRow.data.toMutableList()
                 combinedTempData.addAll(rightRow.data.toMutableList())
                 combinedTempRow.data = combinedTempData
-                if (compareLeftRight(EBinOp.GREATER)(combinedTempRow)) {
+                if (compareLeftRight(EBinOp.GREATER, leftAttributeIndex, leftTable.numberOfColumns + rightAttributeIndex)(combinedTempRow)) {
                     j++
-                } else if (compareLeftRight(EBinOp.EQUAL)(combinedTempRow) && overlap(leftRow, rightRow)) {
+                } else if (compareLeftRight(EBinOp.EQUAL, leftAttributeIndex, leftTable.numberOfColumns + rightAttributeIndex)(combinedTempRow) && !overlap(leftRow, rightRow)) {
+                    j++
+                } else if (compareLeftRight(EBinOp.EQUAL, leftAttributeIndex, leftTable.numberOfColumns + rightAttributeIndex)(combinedTempRow) && overlap(leftRow, rightRow)) {
                     val combinedRow = Row()
                     when (joinType) {
                         JoinType.LEFT -> {}
                         JoinType.RIGHT -> {}
                         JoinType.UNTIL -> {
                             if ((leftRow.startTime != minTime || leftRow.endTime != minTime) && (rightRow.startTime != minTime || rightRow.endTime != minTime)) {
-                                var startTime = rightRow.endTime - 1
-                                var endTime = min(leftRow.endTime, rightRow.endTime) - 1
+                                var startTime = decrementTime(leftRow.startTime, TIME_UNITS)
+                                var endTime = decrementTime( min(leftRow.endTime, rightRow.endTime), TIME_UNITS)
                                 startTime = if (startTime < minTime) minTime else startTime
                                 endTime = if (endTime < minTime) minTime else endTime
                                 val combinedData = leftRow.data.toMutableList()
-                                combinedData.removeAt(leftAttributeIndex)
+                                // combinedData.removeAt(leftAttributeIndex)
                                 combinedData.addAll(rightRow.data)
                                 combinedRow.startTime = startTime
                                 combinedRow.endTime = endTime
                                 combinedRow.data = combinedData
                                 combinedTable.rows.add(combinedRow)
                                 count++
-                                break@loop
+
+                                // break@loop
                             }
+                            j++
                         }
                         JoinType.SINCE -> {
                             if ((leftRow.startTime != maxTime || leftRow.endTime != maxTime) && (rightRow.startTime != maxTime || rightRow.endTime != maxTime)) {
-                                var startTime = max(leftRow.startTime, rightRow.startTime) + 1
-                                var endTime = leftRow.endTime + 1
+                                var startTime = incrementTime(max(leftRow.startTime, rightRow.startTime), TIME_UNITS)
+                                var endTime = incrementTime(leftRow.endTime, TIME_UNITS)
                                 startTime = if (startTime > maxTime) maxTime else startTime
                                 endTime = if (endTime > maxTime) maxTime else endTime
                                 val combinedData = leftRow.data.toMutableList()
-                                combinedData.removeAt(leftAttributeIndex)
+                                // combinedData.removeAt(leftAttributeIndex)
                                 combinedData.addAll(rightRow.data)
                                 combinedRow.startTime = startTime
                                 combinedRow.endTime = endTime
                                 combinedRow.data = combinedData
                                 combinedTable.rows.add(combinedRow)
                                 count++
-                                break@loop
+
+
+                                // break@loop
                             }
+                            j++
                         }
                         JoinType.INNER -> {
                             val startTime = max(leftRow.startTime, rightRow.startTime)
                             val endTime = min(leftRow.endTime, rightRow.endTime)
                             val combinedData = leftRow.data.toMutableList()
-                            combinedData.removeAt(leftAttributeIndex)
+                            // combinedData.removeAt(leftAttributeIndex)
                             combinedData.addAll(rightRow.data)
                             combinedRow.startTime = startTime
                             combinedRow.endTime = endTime
                             combinedRow.data = combinedData
                             combinedTable.rows.add(combinedRow)
                             count++
-                            break@loop
+                            j++
+                            // break@loop
                         }
                         JoinType.CROSS -> {}
                         JoinType.FULL -> {}
@@ -149,17 +165,19 @@ class JoinAST(
 
     override fun execute(dataSourceI: DataSourceI?): DataSourceI? {
 
-        val leftTable = left.getDataSortedBy(leftAttributeAST.value)
+        val leftTable = left.getDataSortedBy(leftAttributeAST.value, true)
+        leftTable.name = leftAttributeAST.tableName
         val rightTable = right.getDataSortedBy(rightAttributeAST.value)
+        rightTable.name = rightAttributeAST.tableName
         val leftAttributeIndex = leftTable.getColumnIndex(leftAttributeAST.value)
         val rightAttributeIndex = rightTable.getColumnIndex(rightAttributeAST.value)
         if (!leftAttributeAST.isLiteral) {
             leftAttributeAST.type = leftTable.columnTypes[leftAttributeIndex]
         }
         if (!rightAttributeAST.isLiteral) {
-            rightAttributeAST.type = leftTable.columnTypes[rightAttributeIndex]
+            rightAttributeAST.type = rightTable.columnTypes[rightAttributeIndex]
         }
-        if (leftAttributeAST.type != rightAttributeAST.type) {
+        if (leftAttributeAST.type != rightAttributeAST.type && !(leftAttributeAST.type.isNumeric() && rightAttributeAST.type.isNumeric())) {
             throw SemanticError("Invalid attributes to join on")
         }
         return execMergeJoin(
@@ -170,26 +188,10 @@ class JoinAST(
             leftAttributeAST.type,
             rightAttributeAST.type
         )
-
-        // return when (leftAttributeAST.type) {
-        //     EType.STRING ->
-        //     EType.INT -> execMergeJoin(leftAttributeAST.value.toInt(), rightAttributeAST.value.toInt())
-        //     EType.BOOL -> execMergeJoin(leftAttributeAST.value.toBoolean(), rightAttributeAST.value.toBoolean())
-        //     EType.DATE -> execMergeJoin(leftAttributeAST.value.toLong(), rightAttributeAST.value.toLong())
-        //     EType.DOUBLE -> execMergeJoin(leftAttributeAST.value.toDouble(), rightAttributeAST.value.toDouble())
-        //     EType.BIGINT -> execMergeJoin(leftAttributeAST.value.toBigInteger(), rightAttributeAST.value.toBigInteger())
-        //     EType.DECIMAL -> execMergeJoin(leftAttributeAST.value.toBigDecimal(), rightAttributeAST.value.toBigDecimal())
-        //     EType.FLOAT -> execMergeJoin(leftAttributeAST.value.toFloat(), rightAttributeAST.value.toFloat())
-        //     EType.NUM -> execMergeJoin((leftAttributeAST.value as Number).toDouble(), (rightAttributeAST.value as Number)).toDouble())
-        //     EType.BLOB -> execMergeJoin(leftAttributeAST.value.toByte(), rightAttributeAST.value.toByte())
-        //     EType.TIMESTAMP -> execMergeJoin(leftAttributeAST.value.toLong(), rightAttributeAST.value.toLong())
-        //     EType.DATETIME -> execMergeJoin(leftAttributeAST.value.toLong(), rightAttributeAST.value.toLong())
-        //     else -> return null
-        // }
     }
 
     fun overlap(left: Row, right: Row): Boolean {
-        return left.startTime <= right.endTime && right.startTime <= left.endTime
+        return left.startTime < right.endTime && right.startTime < left.endTime
     }
 
     override fun getData(): Table {

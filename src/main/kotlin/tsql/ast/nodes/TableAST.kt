@@ -25,13 +25,15 @@ class TableAST (
     override fun execute(dataSourceI: DataSourceI?): DataSourceI? {
         val query = "SELECT * FROM $name;"
         this.table = Query.execQuery(query)
+        this.table!!.name = if (alias != "") alias else name
         return this.table!!
     }
 
     override fun getDataSortedBy(attribute: String, asc: Boolean): Table {
         val direction = if (asc) "ASC" else "DESC"
-        val query = "SELECT * FROM $name ORDER BY $attribute $direction;"
+        val query = "SELECT * FROM $name ORDER BY \"$attribute\" $direction, start_time $direction, end_time $direction;"
         this.table = Query.execQuery(query)
+        this.table!!.name = if (alias != "") alias else name
         return this.table!!
     }
 

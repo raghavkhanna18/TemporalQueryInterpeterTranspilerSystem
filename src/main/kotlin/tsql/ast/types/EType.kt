@@ -16,11 +16,12 @@ enum class EType(s: String) {
     BLOB("int8"),
     TIMESTAMP("timestamp"),
     DATETIME("datetime"),
+    LONG("long"),
     BIGINT("bigint");
 
     fun isNumeric(): Boolean {
         return when (this) {
-            BIGINT, NUM, DECIMAL, FLOAT, DOUBLE -> true
+            BIGINT, NUM, DECIMAL, FLOAT, DOUBLE, LONG -> true
             else -> false
         }
     }

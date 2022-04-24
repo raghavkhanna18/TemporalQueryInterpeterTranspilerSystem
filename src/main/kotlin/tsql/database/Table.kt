@@ -6,12 +6,14 @@ import tsql.ast.types.EType
 import tsql.error.SemanticError
 import java.math.BigDecimal
 import java.math.BigInteger
+import java.time.Instant
 
 class Table(
     var columnNames: MutableList<String> = mutableListOf(),
     var columnTypes: MutableList<EType> = mutableListOf(),
     var rows: MutableList<Row> = mutableListOf(),
-    var numberOfColumns: Int = 0
+    var numberOfColumns: Int = 0,
+    var name: String = ""
 ) : DataSourceI, Cloneable {
     fun putCollumns(numberOfColumns: Int, columnNames: MutableList<String>, columnTypes: MutableList<EType>) {
         this.numberOfColumns = numberOfColumns
@@ -127,6 +129,9 @@ class Table(
             if (condition.lhsType == EType.FLOAT && condition.rhsType == EType.FLOAT) {
                 return convertToFunction(condition.lhs.toFloat(), condition.rhs.toFloat(), condition.comparator)
             }
+            if (condition.lhsType == EType.LONG && condition.rhsType == EType.LONG) {
+                return convertToFunction(condition.lhs.toLong(), condition.rhs.toLong(), condition.comparator)
+            }
             if (condition.lhsType == EType.BIGINT && condition.rhsType == EType.BIGINT) {
                 return convertToFunction(
                     condition.lhs.toBigInteger(),
@@ -163,6 +168,11 @@ class Table(
             if (condition.lhsType == EType.FLOAT && condition.rhsType == EType.FLOAT) {
                 return convertToFunctionIndex(
                     getColumnIndex(condition.lhs), condition.rhs.toFloat(), condition.comparator
+                )
+            }
+            if (condition.lhsType == EType.LONG && condition.rhsType == EType.LONG) {
+                return convertToFunctionIndex(
+                    getColumnIndex(condition.lhs), condition.rhs.toLong(), condition.comparator
                 )
             }
             if (condition.lhsType == EType.BIGINT && condition.rhsType == EType.BIGINT) {
@@ -249,12 +259,12 @@ class Table(
 
     fun <T : Comparable<T>> convertToFunctionIndex(index: Int, rhs: T, operator: EBinOp): (Row) -> Boolean {
         return when (operator) {
-            EBinOp.EQUAL -> { row: Row -> row.data[index] == rhs }
+            EBinOp.EQUAL -> { row: Row -> row.data[index] as T == rhs }
             EBinOp.LESS_EQUAL -> { row: Row -> (row.data[index] as T <= rhs) }
             EBinOp.GREATER_EQUAL -> { row: Row -> (row.data[index] as T >= rhs) }
             EBinOp.LESS -> { row: Row -> ((row.data[index] as T) < rhs) }
             EBinOp.GREATER -> { row: Row -> (row.data[index] as T > rhs) }
-            EBinOp.NOT_EQUAL -> { row: Row -> (row.data[index] != rhs) }
+            EBinOp.NOT_EQUAL -> { row: Row -> (row.data[index] as T != rhs) }
             else -> { _: Row -> false }
         }
     }
@@ -292,9 +302,14 @@ class Table(
                             val rhsData = getDataAsFloat(row, indexRhs)
                             return lhsData == rhsData
                         }
-                        EType.BIGINT -> {
+                        EType.LONG -> {
                             val lhsData = getDataAsLong(row, indexLhs)
                             val rhsData = getDataAsLong(row, indexRhs)
+                            return lhsData == rhsData
+                        }
+                        EType.BIGINT -> {
+                            val lhsData = getDataAsBigInt(row, indexLhs)
+                            val rhsData = getDataAsBigInt(row, indexRhs)
                             return lhsData == rhsData
                         }
                         EType.DECIMAL -> {
@@ -339,9 +354,14 @@ class Table(
                             val rhsData = getDataAsFloat(row, indexRhs)
                             return lhsData <= rhsData
                         }
-                        EType.BIGINT -> {
+                        EType.LONG -> {
                             val lhsData = getDataAsLong(row, indexLhs)
                             val rhsData = getDataAsLong(row, indexRhs)
+                            return lhsData <= rhsData
+                        }
+                        EType.BIGINT -> {
+                            val lhsData = getDataAsBigInt(row, indexLhs)
+                            val rhsData = getDataAsBigInt(row, indexRhs)
                             return lhsData <= rhsData
                         }
                         EType.DECIMAL -> {
@@ -386,9 +406,14 @@ class Table(
                             val rhsData = getDataAsFloat(row, indexRhs)
                             return lhsData >= rhsData
                         }
-                        EType.BIGINT -> {
+                        EType.LONG -> {
                             val lhsData = getDataAsLong(row, indexLhs)
                             val rhsData = getDataAsLong(row, indexRhs)
+                            return lhsData >= rhsData
+                        }
+                        EType.BIGINT -> {
+                            val lhsData = getDataAsBigInt(row, indexLhs)
+                            val rhsData = getDataAsBigInt(row, indexRhs)
                             return lhsData >= rhsData
                         }
                         EType.DECIMAL -> {
@@ -433,9 +458,14 @@ class Table(
                             val rhsData = getDataAsFloat(row, indexRhs)
                             return lhsData < rhsData
                         }
-                        EType.BIGINT -> {
+                        EType.LONG -> {
                             val lhsData = getDataAsLong(row, indexLhs)
                             val rhsData = getDataAsLong(row, indexRhs)
+                            return lhsData < rhsData
+                        }
+                        EType.BIGINT -> {
+                            val lhsData = getDataAsBigInt(row, indexLhs)
+                            val rhsData = getDataAsBigInt(row, indexRhs)
                             return lhsData < rhsData
                         }
                         EType.DECIMAL -> {
@@ -480,9 +510,14 @@ class Table(
                             val rhsData = getDataAsFloat(row, indexRhs)
                             return lhsData > rhsData
                         }
-                        EType.BIGINT -> {
+                        EType.LONG -> {
                             val lhsData = getDataAsLong(row, indexLhs)
                             val rhsData = getDataAsLong(row, indexRhs)
+                            return lhsData > rhsData
+                        }
+                        EType.BIGINT -> {
+                            val lhsData = getDataAsBigInt(row, indexLhs)
+                            val rhsData = getDataAsBigInt(row, indexRhs)
                             return lhsData > rhsData
                         }
                         EType.DECIMAL -> {
@@ -527,9 +562,14 @@ class Table(
                             val rhsData = getDataAsFloat(row, indexRhs)
                             return lhsData != rhsData
                         }
-                        EType.BIGINT -> {
+                        EType.LONG -> {
                             val lhsData = getDataAsLong(row, indexLhs)
                             val rhsData = getDataAsLong(row, indexRhs)
+                            return lhsData != rhsData
+                        }
+                        EType.BIGINT -> {
+                            val lhsData = getDataAsBigInt(row, indexLhs)
+                            val rhsData = getDataAsBigInt(row, indexRhs)
                             return lhsData != rhsData
                         }
                         EType.DECIMAL -> {
@@ -570,7 +610,7 @@ class Table(
                             return lhsData == rhsData
                         }
                         EType.INT, EType.DOUBLE, EType.FLOAT,
-                        EType.DECIMAL, EType.NUM, EType.BIGINT -> {
+                        EType.DECIMAL, EType.NUM, EType.BIGINT, EType.LONG -> {
                             val lhsData = getDataAsNumber(row, indexLhs)
                             val rhsData = getDataAsNumber(row, indexRhs)
                             return lhsData.toDouble() == rhsData.toDouble()
@@ -593,7 +633,7 @@ class Table(
                             return lhsData <= rhsData
                         }
                         EType.INT, EType.DOUBLE, EType.FLOAT,
-                        EType.DECIMAL, EType.NUM, EType.BIGINT -> {
+                        EType.DECIMAL, EType.NUM, EType.BIGINT, EType.LONG -> {
                             val lhsData = getDataAsNumber(row, indexLhs)
                             val rhsData = getDataAsNumber(row, indexRhs)
                             return lhsData.toDouble() <= rhsData.toDouble()
@@ -616,7 +656,7 @@ class Table(
                             return lhsData >= rhsData
                         }
                         EType.INT, EType.DOUBLE, EType.FLOAT,
-                        EType.DECIMAL, EType.NUM, EType.BIGINT -> {
+                        EType.DECIMAL, EType.NUM, EType.BIGINT, EType.LONG -> {
                             val lhsData = getDataAsNumber(row, indexLhs)
                             val rhsData = getDataAsNumber(row, indexRhs)
                             return lhsData.toDouble() >= rhsData.toDouble()
@@ -640,7 +680,7 @@ class Table(
                             return lhsData < rhsData
                         }
                         EType.INT, EType.DOUBLE, EType.FLOAT,
-                        EType.DECIMAL, EType.NUM, EType.BIGINT -> {
+                        EType.DECIMAL, EType.NUM, EType.BIGINT, EType.LONG -> {
                             val lhsData = getDataAsNumber(row, indexLhs)
                             val rhsData = getDataAsNumber(row, indexRhs)
                             return lhsData.toDouble() < rhsData.toDouble()
@@ -663,7 +703,7 @@ class Table(
                             return lhsData > rhsData
                         }
                         EType.INT, EType.DOUBLE, EType.FLOAT,
-                        EType.DECIMAL, EType.NUM, EType.BIGINT -> {
+                        EType.DECIMAL, EType.NUM, EType.BIGINT, EType.LONG -> {
                             val lhsData = getDataAsNumber(row, indexLhs)
                             val rhsData = getDataAsNumber(row, indexRhs)
                             return lhsData.toDouble() > rhsData.toDouble()
@@ -687,7 +727,7 @@ class Table(
                             return lhsData != rhsData
                         }
                         EType.INT, EType.DOUBLE, EType.FLOAT,
-                        EType.DECIMAL, EType.NUM, EType.BIGINT -> {
+                        EType.DECIMAL, EType.NUM, EType.BIGINT, EType.LONG -> {
                             val lhsData = getDataAsNumber(row, indexLhs)
                             val rhsData = getDataAsNumber(row, indexRhs)
                             return lhsData.toDouble() != rhsData.toDouble()
@@ -728,6 +768,10 @@ class Table(
         return row.data[index] as Long
     }
 
+    fun getDataAsBigInt(row: Row, index: Int): BigInteger {
+        return row.data[index] as BigInteger
+    }
+
     fun getDataAsDecimal(row: Row, index: Int): BigDecimal {
         return row.data[index] as BigDecimal
     }
@@ -752,14 +796,14 @@ class Table(
         println()
 
         for (i in 0 until this.rows.size) {
-            val r = this.rows[i] /* fetch next row from the set */
+            val r = this.rows[i]
             val values = r.data
 
             for (j in values.indices) {
                 print(values[j].toString() + " | ")
             }
             System.out.println(
-                " [" + r.startTime + ", " + r.endTime + "]"
+                " [" + Instant.ofEpochMilli(r.startTime) + ", " + Instant.ofEpochMilli(r.endTime) + "]"
             )
         }
     }

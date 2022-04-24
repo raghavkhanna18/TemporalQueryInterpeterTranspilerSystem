@@ -24,8 +24,10 @@ class StatementAST(
     }
 
     override fun execute(dataSourceI: DataSourceI?): DataSourceI? {
+        atOperationAST?.execute(dataSourceI)
         val baseData = dataSourceAST.execute()
-        val filteredData = if (whereOperationAST != null) whereOperationAST.execute(baseData) else baseData
+        val modalData = if (modalOperationAST != null) modalOperationAST.execute(baseData) else baseData
+        val filteredData = if (whereOperationAST != null) whereOperationAST.execute(modalData) else modalData
         return selectAST.execute(filteredData)
     }
 

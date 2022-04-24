@@ -13,7 +13,7 @@ enum class JDBCTypes(name: String) {
     },
     NUMERIC("NUMERIC") {
         override fun toEType(): EType {
-            TODO("Not yet implemented")
+            return EType.DECIMAL
         }
     },
     DECIMAL("decimal") {
@@ -43,7 +43,7 @@ enum class JDBCTypes(name: String) {
     },
     BIGINT("BIGINT") {
         override fun toEType(): EType {
-            return EType.BIGINT
+            return EType.LONG
         }
     },
     FLOAT("FLOAT") {

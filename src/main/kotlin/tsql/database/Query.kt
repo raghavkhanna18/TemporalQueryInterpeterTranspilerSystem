@@ -2,16 +2,21 @@ package tsql.database
 
 import tsql.ast.types.EType
 import tsql.ast.types.JDBCTypes
+import tsql.error.SemanticError
 import java.sql.Connection
 import java.sql.DriverManager
 import java.sql.JDBCType
 import java.sql.ResultSet
 import java.sql.ResultSetMetaData
 import java.sql.SQLException
+import java.time.Instant
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.ZoneOffset
 
 object Query {
     val driverClass: String = "postgres"
-    var url = "jdbc:postgresql://localhost/test"
+    var url = "jdbc:postgresql://localhost/music"
     var username = "tsql_test"
     var password = "test"
     var startTimePos = 99
@@ -115,7 +120,7 @@ object Query {
             for (i in 0 until count)  /* go through each column of the row */ {
                 /* ignore the start and end time row values */
                 // if (i != startTimePos && i != endTimePos) {
-                val resultSetVal = rs.getObject(i + 1)
+                val resultSetVal = rs.getObject(i + 1) ?: continue
                 rowVals[i] = resultSetVal
                 if (resultSetVal == null || rowVals[i] == "null") {
                     rowVals[i] = "null"
@@ -133,8 +138,35 @@ object Query {
         var endTime = Long.MAX_VALUE
         try {
             // +1 as index from 1
-            startTime = rs.getLong(startTimePos + 1)
-            endTime = rs.getLong(endTimePos + 1)
+            val startTimeType = JDBCType.valueOf(rs.metaData.getColumnType(startTimePos + 1))
+            val endTimeType = JDBCType.valueOf(rs.metaData.getColumnType(endTimePos + 1))
+            if (startTimeType != endTimeType) {
+                throw SemanticError("Start time and End time must be of same type")
+            }
+            when (startTimeType) {
+                JDBCType.DATE -> {
+                    startTime =
+                        rs.getDate(startTimePos + 1).toLocalDate().atStartOfDay().toInstant(ZoneOffset.UTC).toEpochMilli()
+                    endTime =
+                        rs.getDate(endTimePos + 1).toLocalDate().atStartOfDay().toInstant(ZoneOffset.UTC).toEpochMilli()
+                }
+                JDBCType.TIME, JDBCType.TIME_WITH_TIMEZONE -> {
+                    startTime = LocalDateTime.of(LocalDate.now(), rs.getTime(startTimePos + 1).toLocalTime()).toInstant(
+                        ZoneOffset.UTC
+                    ).toEpochMilli()
+                    endTime = LocalDateTime.of(LocalDate.now(), rs.getTime(endTimePos + 1).toLocalTime()).toInstant(
+                        ZoneOffset.UTC).toEpochMilli()
+                }
+                JDBCType.TIMESTAMP, JDBCType.TIMESTAMP_WITH_TIMEZONE -> {
+                    startTime = rs.getTimestamp(startTimePos + 1).toInstant().toEpochMilli()
+                    endTime = rs.getTimestamp(endTimePos + 1).toInstant().toEpochMilli()
+                }
+                else -> {
+                    startTime = rs.getLong(startTimePos + 1)
+                    endTime = rs.getLong(endTimePos + 1)
+                }
+            }
+            // endTime = Instant.now().toEpochMilli()
         } catch (e: SQLException) {
             println("SQL error " + e.message)
         }

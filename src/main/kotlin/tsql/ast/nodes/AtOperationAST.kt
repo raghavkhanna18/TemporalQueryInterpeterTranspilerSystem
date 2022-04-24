@@ -1,14 +1,16 @@
 package tsql.ast.nodes
 
+import tsql.Utils
 import tsql.ast.nodes.visitor.Visitable
 import tsql.ast.symbol_table.SymbolTableInterface
+import tsql.ast.types.EType
 import tsql.error.SemanticErrorListener
 import tsql.error.SyntaxErrorListener
 
 class AtOperationAST (
-    override val id: NodeId = AstNode.getId()
-    // override val position: Pair<Pair<Int, Int>, Pair<Int, Int>> = Pair(Pair(0, 0), Pair(0, 0))
+    val literalValueAST: LiteralValueAST
 )  : AstNode, Visitable()  {
+    override val id: NodeId = AstNode.getId()
     override fun checkNode(
         syntaxErrorListener: SyntaxErrorListener,
         semanticErrorListener: SemanticErrorListener,
@@ -18,6 +20,20 @@ class AtOperationAST (
     }
 
     override fun execute(dataSourceI: DataSourceI?): DataSourceI? {
-        TODO("Not yet implemented")
+        val time = literalValueAST.value
+        val type = literalValueAST.type
+        Utils.CURRENT_TIME = convertLiteralValueToLong(time, type)
+        return dataSourceI
+    }
+
+    fun convertLiteralValueToLong(literalValue : String, type: EType) : Long {
+        return when(type){
+            EType.DATE, EType.DATETIME -> { 0}
+            EType.LONG, EType.INT, EType.BIGINT ->  {literalValue.toLong()}
+            EType.DECIMAL, EType.FLOAT, EType.DOUBLE, EType.NUM -> {literalValue.toDouble().toLong()}
+            else -> {
+                0
+            }
+        }
     }
 }
