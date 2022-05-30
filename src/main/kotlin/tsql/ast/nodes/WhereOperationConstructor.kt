@@ -10,7 +10,7 @@ class WhereOperationConstructor(val syntaxErrorListener: SyntaxErrorListener) : 
     override fun visitWhere_op_and(ctx: TSQLParser.Where_op_andContext): WhereOperationAST {
 
         return WhereOperationAST(
-            lhs = ctx.accept(WhereExpressionConstructor(syntaxErrorListener)),
+            lhs = ctx.where_expresion().accept(WhereExpressionConstructor(syntaxErrorListener)),
             rhs = ctx.where_operation().accept(WhereOperationConstructor(syntaxErrorListener)),
             conjuction = EBinOp.AND
         )
@@ -18,7 +18,7 @@ class WhereOperationConstructor(val syntaxErrorListener: SyntaxErrorListener) : 
 
     override fun visitWhere_op_or(ctx: TSQLParser.Where_op_orContext): WhereOperationAST {
         return WhereOperationAST(
-            lhs = ctx.accept(WhereExpressionConstructor(syntaxErrorListener)),
+            lhs = ctx.where_expresion().accept(WhereExpressionConstructor(syntaxErrorListener)),
             rhs = ctx.where_operation().accept(WhereOperationConstructor(syntaxErrorListener)),
             conjuction = EBinOp.OR
         )

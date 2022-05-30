@@ -1,14 +1,26 @@
 package tsql.ast.types
 
 // All types in TSQL language.
-enum class EType {
-    INT, BOOL, STRING, DATE, DOUBLE, FLOAT,
-    UNKNOWN, NULL, STATEMENT, ERROR,
-    NUMBER, BLOB, TIMESTAMP, DATETIME;
+enum class EType(s: String) {
+    INT("int8"),
+    DECIMAL("decimal"),
+    BOOL("bool"),
+    STRING("string"),
+    DATE("date"),
+    DOUBLE("double"),
+    FLOAT("float"),
+    UNKNOWN("unknown"),
+    NULL("null"),
+    ERROR("error"),
+    NUM("number"),
+    BLOB("int8"),
+    TIMESTAMP("timestamp"),
+    DATETIME("datetime"),
+    BIGINT("bigint");
 
-    fun isSimpleValueType(): Boolean {
+    fun isNumeric(): Boolean {
         return when (this) {
-            INT, BOOL, DATE, STRING -> true
+            BIGINT, NUM, DECIMAL, FLOAT, DOUBLE -> true
             else -> false
         }
     }

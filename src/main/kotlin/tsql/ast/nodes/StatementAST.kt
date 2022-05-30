@@ -7,11 +7,11 @@ import tsql.error.SyntaxErrorListener
 
 class StatementAST(
     // override val position: Pair<Pair<Int, Int>, Pair<Int, Int>>,
-    selectAST: SelectAST,
-    DataSourceAST: DataSourceI,
-    whereOperationAST: WhereOperationAST?,
-    modalOperationAST: ModalOperationAST?,
-    atOperationAST: AtOperationAST?
+    val selectAST: SelectAST,
+    val dataSourceAST: AstNode,
+    val whereOperationAST: WhereOperationAST?,
+    val modalOperationAST: ModalOperationAST?,
+    val atOperationAST: AtOperationAST?
 ) : AstNode,
     Visitable() {
     override val id: NodeId = AstNode.getId()
@@ -24,7 +24,9 @@ class StatementAST(
     }
 
     override fun execute(dataSourceI: DataSourceI?): DataSourceI? {
-        TODO("Not yet implemented")
+        val baseData = dataSourceAST.execute()
+        val filteredData = if (whereOperationAST != null) whereOperationAST.execute(baseData) else baseData
+        return selectAST.execute(filteredData)
     }
 
     override fun toString(): String {

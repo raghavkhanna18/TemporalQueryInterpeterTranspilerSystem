@@ -493,8 +493,8 @@ coalesce_statement:
     COALESCE? statement;
 
 statement:
-    select_operator FROM_ table (where_operation)? (modal_operation)? (at_operation)? SCOL                          # select_from_table
-    | select_operator FROM_ binary_operation (where_operation)? (modal_operation)? (at_operation)? SCOL             # select_from_bin_opn
+    select_operator FROM_ table (WHERE_ where_operation)? (modal_operation)? (at_operation)? SCOL                          # select_from_table
+    | select_operator FROM_ binary_operation (WHERE_ where_operation)? (modal_operation)? (at_operation)? SCOL             # select_from_bin_opn
     | select_operator FROM_ join_operation ( WHERE_ where_operation)? (modal_operation)? (at_operation)? SCOL               # select_from_join
 
 ;

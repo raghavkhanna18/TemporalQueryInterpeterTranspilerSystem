@@ -52,7 +52,9 @@ fun constructParser(syntaxErrorListener: SyntaxErrorListener, charStream: CharSt
 
 fun constructAndCreateAST(syntaxErrorAccumulator: ErrorAccumulator, semanticErrorAccumulator: ErrorAccumulator, input: String): ProgramAST {
     val charStream = CharStreams.fromString(input)
-    return createAST(syntaxErrorAccumulator, semanticErrorAccumulator, charStream)
+    val ast = createAST(syntaxErrorAccumulator, semanticErrorAccumulator, charStream)
+    ast.execute()?.print()
+    return ast
 }
 
 

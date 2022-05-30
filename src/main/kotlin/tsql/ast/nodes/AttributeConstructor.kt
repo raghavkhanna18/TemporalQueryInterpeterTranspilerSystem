@@ -58,15 +58,16 @@ class AttributeConstructor(val syntaxErrorListener: SyntaxErrorListener) : TSQLP
     }
 
     override fun visitAttri_star(ctx: TSQLParser.Attri_starContext): AttributeAST {
-        return AttributeAST(
-            // Pair(
-            //     Pair(
-            //         ctx.start.line, ctx.start.charPositionInLine
-            //     ), Pair(ctx.stop.line, ctx.stop.charPositionInLine + ctx.stop.text.length)
-            // ),
-            value = ctx.STAR().symbol.text,
-            isLiteral = false
-        )
+        val attrType =
+            return AttributeAST(
+                // Pair(
+                //     Pair(
+                //         ctx.start.line, ctx.start.charPositionInLine
+                //     ), Pair(ctx.stop.line, ctx.stop.charPositionInLine + ctx.stop.text.length)
+                // ),
+                value = ctx.STAR().symbol.text,
+                isLiteral = false
+            )
     }
 
     override fun visitAttrie_as(ctx: TSQLParser.Attrie_asContext): AttributeAST {

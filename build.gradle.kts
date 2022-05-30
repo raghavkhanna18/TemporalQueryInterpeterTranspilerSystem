@@ -21,6 +21,7 @@ dependencies {
     implementation(kotlin("stdlib"))
     implementation("org.apache.commons:commons-text:1.8")
     implementation("com.xenomachina:kotlin-argparser:2.0.7")
+    implementation("org.postgresql:postgresql:42.3.1")
     runtime(group = "org.apache.commons", name = "commons-lang3", version = "3.9")
     antlr("org.antlr:antlr4:4.10.1")
     implementation(files("lib/antlr-4.10.1-complete.jar"))

@@ -13,7 +13,7 @@ class LiteralValueConstructor(syntaxErrorListener: SyntaxErrorListener) : TSQLPa
             //     Pair(ctx.STRING_LITERAL().symbol.line, ctx.STRING_LITERAL().symbol.charPositionInLine),
             //     Pair(ctx.stop.line, ctx.stop.charPositionInLine)
             // ),
-            value = ctx.STRING_LITERAL().symbol.text,
+            value = ctx.STRING_LITERAL().symbol.text.removeSurrounding("'"),
             type = EType.STRING
         )
     }
@@ -25,7 +25,7 @@ class LiteralValueConstructor(syntaxErrorListener: SyntaxErrorListener) : TSQLPa
             //     Pair(ctx.stop.line, ctx.stop.charPositionInLine)
             // ),
             value = ctx.NUMERIC_LITERAL().symbol.text,
-            type = EType.NUMBER
+            type = EType.NUM
         )
     }
 
@@ -69,7 +69,7 @@ class LiteralValueConstructor(syntaxErrorListener: SyntaxErrorListener) : TSQLPa
             //     Pair(ctx.stop.line, ctx.stop.charPositionInLine)
             // ),
             value = ctx.CURRENT_DATE_().symbol.text,
-            type = EType.DATETIME
+            type = EType.DATE
         )
     }
 

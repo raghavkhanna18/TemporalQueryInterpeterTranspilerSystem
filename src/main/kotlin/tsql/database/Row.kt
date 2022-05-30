@@ -1,9 +1,9 @@
 package tsql.database
 
 data class Row(
-    val startTime: Int = 0,
-    val endTime: Int = Integer.MAX_VALUE,
-    val data: MutableList<Any> = mutableListOf()
+    var startTime: Long = 0,
+    var endTime: Long = Long.MAX_VALUE,
+    var data: MutableList<Any> = mutableListOf()
 ) {
 
 
@@ -27,8 +27,8 @@ data class Row(
     }
 
     override fun hashCode(): Int {
-        var result = startTime
-        result = 31 * result + endTime
+        var result = startTime.hashCode()
+        result = 31 * result + endTime.hashCode()
         result = 31 * result + data.hashCode()
         return result
     }

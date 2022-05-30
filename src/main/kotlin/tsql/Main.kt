@@ -6,10 +6,11 @@ import tsql.ast.constructAndCreateAST
 import tsql.error.CommonErrorPrinter
 import tsql.error.ErrorAccumulator
 fun main(args: Array<String>) = mainBody {
-    val input = "SELECT t.a, t.b FROM t SINCE JOIN z ON t.a = z.b WHERE a = 1 and b < c at 2;"
+    val input =
+        "SELECT * FROM accounts WHERE start_time <= balance AND fname = 'Raghav' or balance > 2000 AND balance < 3000;"
     val syntaxErrorAccumulator = ErrorAccumulator(
         Constants.SYNTAX_EXIT_CODE,
-        CommonErrorPrinter(arrayOf( input))
+        CommonErrorPrinter(arrayOf(input))
     )
     val semanticErrorAccumulator = ErrorAccumulator(
         Constants.SEMANTIC_EXIT_CODE,
@@ -21,4 +22,5 @@ fun main(args: Array<String>) = mainBody {
         semanticErrorAccumulator,
         input
     )
+
 }

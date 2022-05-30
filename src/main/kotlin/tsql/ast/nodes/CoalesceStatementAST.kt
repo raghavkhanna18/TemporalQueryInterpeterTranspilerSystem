@@ -20,7 +20,7 @@ class CoalesceStatementAST(
     }
 
     override fun execute(dataSourceI: DataSourceI?): DataSourceI? {
-        TODO("Not yet implemented")
+        return statementAST.execute()
     }
 
     override fun toString(): String {

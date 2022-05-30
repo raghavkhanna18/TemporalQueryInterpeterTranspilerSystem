@@ -23,18 +23,25 @@ class TableAST (
     }
 
     override fun execute(dataSourceI: DataSourceI?): DataSourceI? {
-        TODO("Not yet implemented")
-    }
-
-    fun exec() : DataSourceI {
         val query = "SELECT * FROM $name;"
         this.table = Query.execQuery(query)
         return this.table!!
     }
 
+    override fun getDataSortedBy(attribute: String, asc: Boolean): Table {
+        val direction = if (asc) "ASC" else "DESC"
+        val query = "SELECT * FROM $name ORDER BY attribute $direction;"
+        this.table = Query.execQuery(query)
+        return this.table!!
+    }
+
+    override fun sort(attribute: String, asc: Boolean) {
+        getDataSortedBy(attribute, asc)
+    }
+
     override fun getData(): Table {
-        if (this.table == null){
-            this.exec()
+        if (this.table == null) {
+            this.execute()
         }
         return this.table!!
     }

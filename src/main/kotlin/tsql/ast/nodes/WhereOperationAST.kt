@@ -29,6 +29,7 @@ class WhereOperationAST(
             return dataSourceI
         }
         val conditions = this.flatten()
+        conditions.second.map { updateConditionType(it, dataSourceI) }
         when(dataSourceI){
             is Table -> {
                 dataSourceI.filter(conditions)
@@ -45,5 +46,21 @@ class WhereOperationAST(
             return Pair(flat_rhs.first, flat_rhs.second)
         }
         return Pair(mutableListOf(), mutableListOf(lhs.toCondition()))
+    }
+
+    fun updateConditionType(condition: Condition, dataSource: DataSourceI) {
+        if (!condition.lhsIsLiteral) {
+            val data = dataSource.getData()
+            val index = data.columnNames.indexOf(condition.lhs)
+            val type = data.columnTypes[index]
+            condition.lhsType = type
+        }
+
+        if (!condition.rhsIsLiteral) {
+            val data = dataSource.getData()
+            val index = data.columnNames.indexOf(condition.rhs)
+            val type = data.columnTypes[index]
+            condition.rhsType = type
+        }
     }
 }

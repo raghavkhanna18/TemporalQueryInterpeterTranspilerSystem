@@ -20,12 +20,15 @@ class ProgramAST(
         scope as TopLevelSymbolTable
         // Validate all functions are correct
         for (statement in statementList) {
-            statement.checkNode(syntaxErrorListener, semanticErrorListener, scope)
+            statement.execute()
         }
     }
 
     override fun execute(dataSourceI: DataSourceI?): DataSourceI? {
-        TODO("Not yet implemented")
+        for (statement in statementList) {
+            return statement.execute()
+        }
+        return null
     }
 
     override fun toString(): String {

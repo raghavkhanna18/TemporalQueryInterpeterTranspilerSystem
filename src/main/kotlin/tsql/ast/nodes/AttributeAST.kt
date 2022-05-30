@@ -29,6 +29,6 @@ open class AttributeAST(
     }
 
     fun getColumnName(): String {
-        if (tableName != "") return value else return "$tableName.$value"
+        if (tableName == "") return value else return "$tableName.$value"
     }
 }

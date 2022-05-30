@@ -5,11 +5,11 @@ import tsql.ast.types.EType
 
 data class Condition(
     val lhs: String,
-    val lhsType: EType = EType.STRING,
+    var lhsType: EType = EType.STRING,
     val lhsIsLiteral: Boolean = false,
     val comparator: EBinOp,
     val rhs: String,
-    val rhsType: EType = EType.STRING,
+    var rhsType: EType = EType.STRING,
     val rhsIsLiteral: Boolean = false
 ) {
     fun flip(): Condition {

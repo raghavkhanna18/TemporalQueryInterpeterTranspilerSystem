@@ -1,22 +1,24 @@
 package tsql.database
 
+import tsql.ast.types.EType
+import tsql.ast.types.JDBCTypes
 import java.sql.Connection
 import java.sql.DriverManager
+import java.sql.JDBCType
 import java.sql.ResultSet
 import java.sql.ResultSetMetaData
 import java.sql.SQLException
 
 object Query {
-    val driverClass: String = "org.postgresql.Driver"
-    var url = "jdbc:postgresql://localhost/"
-    var username = ""
-    var password = ""
+    val driverClass: String = "postgres"
+    var url = "jdbc:postgresql://localhost/test"
+    var username = "tsql_test"
+    var password = "test"
     var startTimePos = 99
     var endTimePos = 99
     var connection: Connection
 
     init {
-        Class.forName(driverClass)
         connection = DriverManager.getConnection(url, username, password)
     }
 
@@ -72,7 +74,7 @@ object Query {
         return number
     }
 
-    private fun extractNamesOfColumns(meta: ResultSetMetaData, count: Int): List<String> {
+    private fun extractNamesOfColumns(meta: ResultSetMetaData, count: Int): MutableList<String> {
         var s: String
         val colNames = Array(count) { i -> "" }
         try {
@@ -82,23 +84,24 @@ object Query {
                     startTimePos = i
                 } else if (s == "end_time") {
                     endTimePos = i
-                } else {
-                    colNames[i] = s
                 }
+
+                colNames[i] = s
             }
         } catch (e: SQLException) {
             println("SQL error " + e.message)
         }
-        return colNames.asList()
+        return colNames.toMutableList()
     }
 
-    fun extractTypesOfColumns(meta: ResultSetMetaData, count: Int): MutableList<Int> {
-        val colTypes = IntArray(count)
+    fun extractTypesOfColumns(meta: ResultSetMetaData, count: Int): MutableList<EType> {
+        val colTypes = Array<EType>(count) { EType.UNKNOWN }
         try {
             for (i in 0 until count) {
-                if (i != startTimePos && i != endTimePos) {
-                    colTypes[i] = meta.getColumnType(i)
-                }
+                // if (i != startTimePos && i != endTimePos) {
+                val nameOfType = JDBCType.valueOf(meta.getColumnType(i + 1)).getName()
+                colTypes[i] = JDBCTypes.valueOf(nameOfType).toEType()
+                // }
             }
         } catch (e: SQLException) {
             println("SQL error " + e.message)
@@ -107,16 +110,17 @@ object Query {
     }
 
     private fun extractValuesFromRow(rs: ResultSet, count: Int): Array<Any> {
-        val rowVals = arrayOf<Any>(count)
+        val rowVals = Array<Any>(count) { 0 }
         try {
             for (i in 0 until count)  /* go through each column of the row */ {
                 /* ignore the start and end time row values */
-                if (i != startTimePos && i != endTimePos) {
-                    val resultSetVal = rs.getObject(i)
-                    if (resultSetVal == null || rowVals[i] == "null") {
-                        rowVals[i] = "null"
-                    }
+                // if (i != startTimePos && i != endTimePos) {
+                val resultSetVal = rs.getObject(i + 1)
+                rowVals[i] = resultSetVal
+                if (resultSetVal == null || rowVals[i] == "null") {
+                    rowVals[i] = "null"
                 }
+                // }
             }
         } catch (e: SQLException) {
             println("SQL error " + e.message)
@@ -124,12 +128,13 @@ object Query {
         return rowVals
     }
 
-    private fun getTimeBoundsOfRow(rs: ResultSet): Pair<Int, Int> {
-        var startTime = Integer.MIN_VALUE
-        var endTime = Integer.MAX_VALUE
+    private fun getTimeBoundsOfRow(rs: ResultSet): Pair<Long, Long> {
+        var startTime = Long.MIN_VALUE
+        var endTime = Long.MAX_VALUE
         try {
-            startTime = rs.getInt(startTimePos)
-            endTime = rs.getInt(endTimePos)
+            // +1 as index from 1
+            startTime = rs.getLong(startTimePos + 1)
+            endTime = rs.getLong(endTimePos + 1)
         } catch (e: SQLException) {
             println("SQL error " + e.message)
         }
