@@ -30,7 +30,7 @@ class TableAST (
 
     override fun getDataSortedBy(attribute: String, asc: Boolean): Table {
         val direction = if (asc) "ASC" else "DESC"
-        val query = "SELECT * FROM $name ORDER BY attribute $direction;"
+        val query = "SELECT * FROM $name ORDER BY $attribute $direction;"
         this.table = Query.execQuery(query)
         return this.table!!
     }

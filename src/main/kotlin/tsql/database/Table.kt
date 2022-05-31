@@ -29,19 +29,24 @@ class Table(
     }
 
     override fun clone(): Table {
-        return Table(columnNames.toMutableList(), columnTypes.toMutableList(), ArrayList(rows.map { it.copy() }), numberOfColumns)
+        return Table(
+            columnNames.toMutableList(),
+            columnTypes.toMutableList(),
+            ArrayList(rows.map { it.copy() }),
+            numberOfColumns
+        )
     }
 
-   fun removeColumn(columnName: String) {
-       for (i in columnNames.indices) {
-           if (columnNames[i] == columnName) {
-               rows.map { row -> row.deleteColumn(i) }
-               columnTypes.removeAt(i)
-           }
-       }
-       columnNames = columnNames.filter { it != columnName }.toMutableList()
-       numberOfColumns--
-   }
+    fun removeColumn(columnName: String) {
+        for (i in columnNames.indices) {
+            if (columnNames[i] == columnName) {
+                rows.map { row -> row.deleteColumn(i) }
+                columnTypes.removeAt(i)
+            }
+        }
+        columnNames = columnNames.filter { it != columnName }.toMutableList()
+        numberOfColumns--
+    }
 
     @OptIn(ExperimentalStdlibApi::class)
     fun removeColumns(colNames: List<String>) {
@@ -208,25 +213,25 @@ class Table(
 
     fun <T : Comparable<T>> convertToFunction(lhs: T, rhs: T, operator: EBinOp): (Row) -> Boolean {
         return when (operator) {
-            EBinOp.EQUAL -> { row: Row -> lhs == rhs }
-            EBinOp.LESS_EQUAL -> { row: Row -> (lhs <= rhs) }
-            EBinOp.GREATER_EQUAL -> { row: Row -> (lhs > rhs) }
-            EBinOp.LESS -> { row: Row -> (lhs < rhs) }
-            EBinOp.GREATER -> { row: Row -> (lhs > rhs) }
-            EBinOp.NOT_EQUAL -> { row: Row -> (lhs != rhs) }
-            else -> { row: Row -> false }
+            EBinOp.EQUAL -> { _: Row -> lhs == rhs }
+            EBinOp.LESS_EQUAL -> { _: Row -> (lhs <= rhs) }
+            EBinOp.GREATER_EQUAL -> { _: Row -> (lhs > rhs) }
+            EBinOp.LESS -> { _: Row -> (lhs < rhs) }
+            EBinOp.GREATER -> { _: Row -> (lhs > rhs) }
+            EBinOp.NOT_EQUAL -> { _: Row -> (lhs != rhs) }
+            else -> { _: Row -> false }
         }
     }
 
     fun convertToFunction(lhs: Number, rhs: Number, operator: EBinOp): (Row) -> Boolean {
         return when (operator) {
-            EBinOp.EQUAL -> { row: Row -> lhs.toDouble() == rhs.toDouble() }
-            EBinOp.LESS_EQUAL -> { row: Row -> (lhs.toDouble() <= rhs.toDouble()) }
-            EBinOp.GREATER_EQUAL -> { row: Row -> (lhs.toDouble() > rhs.toDouble()) }
-            EBinOp.LESS -> { row: Row -> (lhs.toDouble() < rhs.toDouble()) }
-            EBinOp.GREATER -> { row: Row -> (lhs.toDouble() > rhs.toDouble()) }
-            EBinOp.NOT_EQUAL -> { row: Row -> (lhs.toDouble() != rhs.toDouble()) }
-            else -> { row: Row -> false }
+            EBinOp.EQUAL -> { _: Row -> lhs.toDouble() == rhs.toDouble() }
+            EBinOp.LESS_EQUAL -> { _: Row -> (lhs.toDouble() <= rhs.toDouble()) }
+            EBinOp.GREATER_EQUAL -> { _: Row -> (lhs.toDouble() > rhs.toDouble()) }
+            EBinOp.LESS -> { _: Row -> (lhs.toDouble() < rhs.toDouble()) }
+            EBinOp.GREATER -> { _: Row -> (lhs.toDouble() > rhs.toDouble()) }
+            EBinOp.NOT_EQUAL -> { _: Row -> (lhs.toDouble() != rhs.toDouble()) }
+            else -> { _: Row -> false }
         }
     }
 
@@ -238,11 +243,11 @@ class Table(
             EBinOp.LESS -> { row: Row -> ((row.data[index] as Number).toDouble() < rhs.toDouble()) }
             EBinOp.GREATER -> { row: Row -> ((row.data[index] as Number).toDouble() > rhs.toDouble()) }
             EBinOp.NOT_EQUAL -> { row: Row -> ((row.data[index] as Number).toDouble() != rhs.toDouble()) }
-            else -> { row: Row -> false }
+            else -> { _: Row -> false }
         }
     }
 
-    private fun <T : Comparable<T>> convertToFunctionIndex(index: Int, rhs: T, operator: EBinOp): (Row) -> Boolean {
+    fun <T : Comparable<T>> convertToFunctionIndex(index: Int, rhs: T, operator: EBinOp): (Row) -> Boolean {
         return when (operator) {
             EBinOp.EQUAL -> { row: Row -> row.data[index] == rhs }
             EBinOp.LESS_EQUAL -> { row: Row -> (row.data[index] as T <= rhs) }
@@ -250,11 +255,11 @@ class Table(
             EBinOp.LESS -> { row: Row -> ((row.data[index] as T) < rhs) }
             EBinOp.GREATER -> { row: Row -> (row.data[index] as T > rhs) }
             EBinOp.NOT_EQUAL -> { row: Row -> (row.data[index] != rhs) }
-            else -> { row: Row -> false }
+            else -> { _: Row -> false }
         }
     }
 
-    private fun convertToFunctionIndexIndex(
+    fun convertToFunctionIndexIndex(
         indexLhs: Int, indexRhs: Int, operator: EBinOp, type: EType
     ): (Row) -> Boolean {
 
@@ -288,14 +293,19 @@ class Table(
                             return lhsData == rhsData
                         }
                         EType.BIGINT -> {
-                            val lhsData = getDataAsBigInt(row, indexLhs)
-                            val rhsData = getDataAsBigInt(row, indexRhs)
+                            val lhsData = getDataAsLong(row, indexLhs)
+                            val rhsData = getDataAsLong(row, indexRhs)
                             return lhsData == rhsData
                         }
                         EType.DECIMAL -> {
                             val lhsData = getDataAsDecimal(row, indexLhs)
                             val rhsData = getDataAsDecimal(row, indexRhs)
                             return lhsData == rhsData
+                        }
+                        EType.NUM -> {
+                            val lhsData = getDataAsNumber(row, indexLhs)
+                            val rhsData = getDataAsNumber(row, indexRhs)
+                            return lhsData.toDouble() > rhsData.toDouble()
                         }
                         else -> return false
                     }
@@ -330,14 +340,19 @@ class Table(
                             return lhsData <= rhsData
                         }
                         EType.BIGINT -> {
-                            val lhsData = getDataAsBigInt(row, indexLhs)
-                            val rhsData = getDataAsBigInt(row, indexRhs)
+                            val lhsData = getDataAsLong(row, indexLhs)
+                            val rhsData = getDataAsLong(row, indexRhs)
                             return lhsData <= rhsData
                         }
                         EType.DECIMAL -> {
                             val lhsData = getDataAsDecimal(row, indexLhs)
                             val rhsData = getDataAsDecimal(row, indexRhs)
                             return lhsData <= rhsData
+                        }
+                        EType.NUM -> {
+                            val lhsData = getDataAsNumber(row, indexLhs)
+                            val rhsData = getDataAsNumber(row, indexRhs)
+                            return lhsData.toDouble() > rhsData.toDouble()
                         }
                         else -> return false
                     }
@@ -372,14 +387,19 @@ class Table(
                             return lhsData >= rhsData
                         }
                         EType.BIGINT -> {
-                            val lhsData = getDataAsBigInt(row, indexLhs)
-                            val rhsData = getDataAsBigInt(row, indexRhs)
+                            val lhsData = getDataAsLong(row, indexLhs)
+                            val rhsData = getDataAsLong(row, indexRhs)
                             return lhsData >= rhsData
                         }
                         EType.DECIMAL -> {
                             val lhsData = getDataAsDecimal(row, indexLhs)
                             val rhsData = getDataAsDecimal(row, indexRhs)
                             return lhsData >= rhsData
+                        }
+                        EType.NUM -> {
+                            val lhsData = getDataAsNumber(row, indexLhs)
+                            val rhsData = getDataAsNumber(row, indexRhs)
+                            return lhsData.toDouble() > rhsData.toDouble()
                         }
                         else -> return false
                     }
@@ -414,14 +434,19 @@ class Table(
                             return lhsData < rhsData
                         }
                         EType.BIGINT -> {
-                            val lhsData = getDataAsBigInt(row, indexLhs)
-                            val rhsData = getDataAsBigInt(row, indexRhs)
+                            val lhsData = getDataAsLong(row, indexLhs)
+                            val rhsData = getDataAsLong(row, indexRhs)
                             return lhsData < rhsData
                         }
                         EType.DECIMAL -> {
                             val lhsData = getDataAsDecimal(row, indexLhs)
                             val rhsData = getDataAsDecimal(row, indexRhs)
                             return lhsData < rhsData
+                        }
+                        EType.NUM -> {
+                            val lhsData = getDataAsNumber(row, indexLhs)
+                            val rhsData = getDataAsNumber(row, indexRhs)
+                            return lhsData.toDouble() > rhsData.toDouble()
                         }
                         else -> return false
                     }
@@ -456,14 +481,19 @@ class Table(
                             return lhsData > rhsData
                         }
                         EType.BIGINT -> {
-                            val lhsData = getDataAsBigInt(row, indexLhs)
-                            val rhsData = getDataAsBigInt(row, indexRhs)
+                            val lhsData = getDataAsLong(row, indexLhs)
+                            val rhsData = getDataAsLong(row, indexRhs)
                             return lhsData > rhsData
                         }
                         EType.DECIMAL -> {
                             val lhsData = getDataAsDecimal(row, indexLhs)
                             val rhsData = getDataAsDecimal(row, indexRhs)
                             return lhsData > rhsData
+                        }
+                        EType.NUM -> {
+                            val lhsData = getDataAsNumber(row, indexLhs)
+                            val rhsData = getDataAsNumber(row, indexRhs)
+                            return lhsData.toDouble() > rhsData.toDouble()
                         }
                         else -> return false
                     }
@@ -498,8 +528,8 @@ class Table(
                             return lhsData != rhsData
                         }
                         EType.BIGINT -> {
-                            val lhsData = getDataAsBigInt(row, indexLhs)
-                            val rhsData = getDataAsBigInt(row, indexRhs)
+                            val lhsData = getDataAsLong(row, indexLhs)
+                            val rhsData = getDataAsLong(row, indexRhs)
                             return lhsData != rhsData
                         }
                         EType.DECIMAL -> {
@@ -507,15 +537,20 @@ class Table(
                             val rhsData = getDataAsDecimal(row, indexRhs)
                             return lhsData != rhsData
                         }
+                        EType.NUM -> {
+                            val lhsData = getDataAsNumber(row, indexLhs)
+                            val rhsData = getDataAsNumber(row, indexRhs)
+                            return lhsData.toDouble() > rhsData.toDouble()
+                        }
                         else -> return false
                     }
                 }
             }
-            else -> { row: Row -> false }
+            else -> { _: Row -> false }
         }
     }
 
-    private fun convertToFunctionIndexIndexNumeric(
+    fun convertToFunctionIndexIndexNumeric(
         indexLhs: Int, indexRhs: Int, operator: EBinOp, type: EType
     ): (Row) -> Boolean {
 
@@ -661,7 +696,7 @@ class Table(
                     }
                 }
             }
-            else -> { row: Row -> false }
+            else -> { _: Row -> false }
         }
     }
 
@@ -669,35 +704,35 @@ class Table(
         return columnNames.indexOf(column)
     }
 
-    private fun getDataAsString(row: Row, index: Int): String {
+    fun getDataAsString(row: Row, index: Int): String {
         return row.data[index] as String
     }
 
-    private fun getDataAsInt(row: Row, index: Int): Int {
+    fun getDataAsInt(row: Row, index: Int): Int {
         return row.data[index] as Int
     }
 
-    private fun getDataAsBoolean(row: Row, index: Int): Boolean {
+    fun getDataAsBoolean(row: Row, index: Int): Boolean {
         return row.data[index] as Boolean
     }
 
-    private fun getDataAsDouble(row: Row, index: Int): Double {
+    fun getDataAsDouble(row: Row, index: Int): Double {
         return row.data[index] as Double
     }
 
-    private fun getDataAsFloat(row: Row, index: Int): Float {
+    fun getDataAsFloat(row: Row, index: Int): Float {
         return row.data[index] as Float
     }
 
-    private fun getDataAsBigInt(row: Row, index: Int): BigInteger {
-        return row.data[index] as BigInteger
+    fun getDataAsLong(row: Row, index: Int): Long {
+        return row.data[index] as Long
     }
 
-    private fun getDataAsDecimal(row: Row, index: Int): BigDecimal {
+    fun getDataAsDecimal(row: Row, index: Int): BigDecimal {
         return row.data[index] as BigDecimal
     }
 
-    private fun getDataAsNumber(row: Row, index: Int): Number {
+    fun getDataAsNumber(row: Row, index: Int): Number {
         return row.data[index] as Number
     }
 

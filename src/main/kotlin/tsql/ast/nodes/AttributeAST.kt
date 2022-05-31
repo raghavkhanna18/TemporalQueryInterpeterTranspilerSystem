@@ -12,7 +12,7 @@ open class AttributeAST(
     val isLiteral: Boolean = false,
     val tableName: String = "",
     val rename: String = value,
-    val type: EType = EType.STRING
+    var type: EType = EType.STRING
 ) : AstNode,
     Visitable() {
     override val id: NodeId = AstNode.getId()
