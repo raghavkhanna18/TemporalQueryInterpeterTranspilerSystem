@@ -1,13 +1,12 @@
 package tsql.ast.nodes
 
-import tsql.ast.nodes.visitor.Visitable
 import tsql.ast.symbol_table.SymbolTable
 import tsql.error.SyntaxErrorListener
 import java.lang.IllegalArgumentException
 
 class SelectAST(
     val attributesAST: AttributesAST
-) : AstNodeI, Visitable() {
+) : AstNodeI {
     override val id: NodeId = AstNodeI.getId()
 
     override fun checkNode(

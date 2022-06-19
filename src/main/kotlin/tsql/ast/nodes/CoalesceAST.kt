@@ -1,6 +1,5 @@
 package tsql.ast.nodes
 
-import tsql.ast.nodes.visitor.Visitable
 import tsql.ast.symbol_table.SymbolTable
 import tsql.error.SyntaxErrorListener
 
