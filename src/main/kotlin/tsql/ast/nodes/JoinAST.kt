@@ -1,6 +1,5 @@
 package tsql.ast.nodes
 
-import tsql.Constants
 import tsql.Utils.MAX_TIME
 import tsql.Utils.MIN_TIME
 import tsql.Utils.TIME_UNITS
@@ -27,14 +26,14 @@ class JoinAST(
     val leftAttributeAST: AttributeAST,
     val rightAttributeAST: AttributeAST
 
-) : AstNode, Visitable(), DataSourceI {
-    override val id: NodeId = AstNode.getId()
+) : AstNodeI, Visitable(), DataSourceI {
+    override val id: NodeId = AstNodeI.getId()
     val maxTime = MAX_TIME
     val minTime = MIN_TIME
     override fun checkNode(
         syntaxErrorListener: SyntaxErrorListener,
         semanticErrorListener: SemanticErrorListener,
-        scope: SymbolTableInterface
+        queryInfo: SymbolTableInterface
     ) {
         TODO("Not yet implemented")
     }

@@ -6,16 +6,13 @@ import tsql.error.SyntaxErrorListener
 
 typealias NodeId = Int
 
-interface AstNode {
-    // Node's position in the source file.
-    // val position: Pair<Pair<Int, Int>, Pair<Int, Int>>
-    // Unique Integer ID of node.
+interface AstNodeI {
     val id: NodeId
 
     fun checkNode(
         syntaxErrorListener: SyntaxErrorListener,
         semanticErrorListener: SemanticErrorListener,
-        scope: SymbolTableInterface
+        queryInfo: SymbolTableInterface
     )
 
     fun execute(dataSourceI: DataSourceI? = null): DataSourceI?
@@ -24,10 +21,6 @@ interface AstNode {
         private var id = 0
         fun getId(): NodeId {
             return id++
-        }
-
-        fun restId() {
-            id = 0
         }
     }
 }

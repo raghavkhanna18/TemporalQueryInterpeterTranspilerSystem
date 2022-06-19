@@ -6,7 +6,7 @@ import tsql.ast.types.AbstractType
 import tsql.error.SemanticErrorListener
 import tsql.error.SyntaxErrorListener
 
-abstract class AstExprNode : AstNode, Visitable() {
+abstract class AstExprNode : AstNodeI, Visitable() {
     lateinit var evaledType: AbstractType
     abstract val weight: Int
 
@@ -19,8 +19,8 @@ abstract class AstExprNode : AstNode, Visitable() {
     override fun checkNode(
         syntaxErrorListener: SyntaxErrorListener,
         semanticErrorListener: SemanticErrorListener,
-        scope: SymbolTableInterface
+        queryInfo: SymbolTableInterface
     ) {
-        checkExprNode(scope, syntaxErrorListener, semanticErrorListener)
+        checkExprNode(queryInfo, syntaxErrorListener, semanticErrorListener)
     }
 }

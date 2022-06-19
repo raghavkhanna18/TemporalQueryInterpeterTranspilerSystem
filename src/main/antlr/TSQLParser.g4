@@ -132,9 +132,10 @@ where_expresion:
     ;
 
 where_operation:
-      where_expresion AND_ where_operation            # where_op_and
-    | where_expresion OR_  where_operation            # where_op_or
-    | where_expresion                                 # where_single
+      where_expresion AND_ where_operation                             # where_op_and
+    | where_expresion OR_  where_operation                             # where_op_or
+    | where_expresion                                                  # where_single
+    | OPEN_PAR where_operation CLOSE_PAR                               # where_nested
     ;
 
 at_operation:
@@ -180,15 +181,18 @@ modal_operator:
     | NEXT_                                             # modal_next
     | ALWAYS_ FUTURE_                                   # modal_always_future
 ;
-coalesce_statement:
-    COALESCE? statement;
+union_statement:
+    statement UNION_ union_statement                  #statement_to_union
+    | statement                                       #single_statement
+    ;
 
 statement:
-    select_operator FROM_ table (WHERE_ where_operation)? (modal_operation)? (at_operation)? SCOL                          # select_from_table
-    | select_operator FROM_ binary_operation (WHERE_ where_operation)? (modal_operation)? (at_operation)? SCOL             # select_from_bin_opn
-    | select_operator FROM_ join_operation ( WHERE_ where_operation)? (modal_operation)? (at_operation)? SCOL               # select_from_join
+    select_operator FROM_ table (WHERE_ where_operation)? (modal_operation)? (at_operation)?                           # select_from_table
+    | select_operator FROM_ binary_operation (WHERE_ where_operation)? (modal_operation)? (at_operation)?              # select_from_bin_opn
+    | select_operator FROM_ join_operation ( WHERE_ where_operation)? (modal_operation)? (at_operation)?                # select_from_join
+    | select_operator FROM_ OPEN_PAR statement CLOSE_PAR ( WHERE_ where_operation)? (modal_operation)? (at_operation)? # select_nested
 
 ;
 
 program:
-    coalesce_statement+ EOF;
+    union_statement SCOL EOF;

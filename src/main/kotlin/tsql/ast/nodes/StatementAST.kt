@@ -8,18 +8,18 @@ import tsql.error.SyntaxErrorListener
 class StatementAST(
     // override val position: Pair<Pair<Int, Int>, Pair<Int, Int>>,
     val selectAST: SelectAST,
-    val dataSourceAST: AstNode,
+    val dataSourceAST: AstNodeI,
     val whereOperationAST: WhereOperationAST?,
     val modalOperationAST: ModalOperationAST?,
     val atOperationAST: AtOperationAST?
-) : AstNode,
+) : AstNodeI,
     Visitable() {
-    override val id: NodeId = AstNode.getId()
+    override val id: NodeId = AstNodeI.getId()
 
     override fun checkNode(
         syntaxErrorListener: SyntaxErrorListener,
         semanticErrorListener: SemanticErrorListener,
-        scope: SymbolTableInterface
+        queryInfo: SymbolTableInterface
     ) {
     }
 

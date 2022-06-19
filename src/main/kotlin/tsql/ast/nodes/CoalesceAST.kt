@@ -5,8 +5,8 @@ import tsql.ast.symbol_table.SymbolTableInterface
 import tsql.error.SemanticErrorListener
 import tsql.error.SyntaxErrorListener
 
-class CoalesceAST : AstNode, Visitable() {
-    override val id: NodeId = AstNode.getId()
+class CoalesceAST : AstNodeI, Visitable() {
+    override val id: NodeId = AstNodeI.getId()
 
     // override fun visitCoalesce(ctx: TSQLParser.CoalesceContext?): CoalesceAST {
     //     return super.visitCoalesce(ctx)
@@ -14,7 +14,7 @@ class CoalesceAST : AstNode, Visitable() {
     override fun checkNode(
         syntaxErrorListener: SyntaxErrorListener,
         semanticErrorListener: SemanticErrorListener,
-        scope: SymbolTableInterface
+        queryInfo: SymbolTableInterface
     ) {
         TODO("Not yet implemented")
     }

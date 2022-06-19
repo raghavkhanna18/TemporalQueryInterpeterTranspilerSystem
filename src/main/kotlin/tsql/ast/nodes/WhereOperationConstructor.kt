@@ -29,4 +29,12 @@ class WhereOperationConstructor(val syntaxErrorListener: SyntaxErrorListener) : 
             lhs = ctx.accept(WhereExpressionConstructor(syntaxErrorListener))
         )
     }
+
+    override fun visitWhere_nested(ctx: TSQLParser.Where_nestedContext): WhereOperationAST {
+        return WhereOperationAST(
+            lhs = null,
+            rhs = ctx.where_operation().accept(WhereOperationConstructor(syntaxErrorListener)),
+            rhsNested = true
+        )
+    }
 }

@@ -11,7 +11,7 @@ import org.antlr.v4.runtime.tree.ParseTree
 import org.antlr.v4.runtime.tree.Trees
 import tsql.ast.nodes.ProgramAST
 import tsql.ast.nodes.ProgramConstructor
-import tsql.ast.symbol_table.TopLevelSymbolTable
+import tsql.ast.symbol_table.SymbolTable
 import tsql.error.ErrorAccumulator
 import tsql.error.SemanticErrorListener
 import tsql.error.SyntaxErrorListener
@@ -76,7 +76,7 @@ private fun createAST(
     val absSynTree = buildAST(parseTree, syntaxErrorListener)
 
     // Perform semantic analysis
-    val topLevelSymbolTable = TopLevelSymbolTable()
+    val symbolTable = SymbolTable()
     // absSynTree.checkNode(syntaxErrorListener, semanticErrorListener, topLevelSymbolTable)
         return absSynTree
     }

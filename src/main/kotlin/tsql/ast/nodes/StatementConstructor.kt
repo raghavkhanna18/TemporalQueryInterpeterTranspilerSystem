@@ -53,4 +53,9 @@ class StatementConstructor(val syntaxErrorListener: SyntaxErrorListener) : TSQLP
             atOperationAST = atOperationAST
         )
     }
+
+    override fun visitSelect_nested(ctx: TSQLParser.Select_nestedContext): StatementAST {
+        // TODO: implement nested selects
+        return super.visitSelect_nested(ctx)
+    }
 }

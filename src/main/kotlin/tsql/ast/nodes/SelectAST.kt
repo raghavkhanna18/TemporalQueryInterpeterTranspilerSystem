@@ -9,13 +9,13 @@ import java.lang.IllegalArgumentException
 class SelectAST(
     // override val position: Pair<Pair<Int, Int>, Pair<Int, Int>> = Pair(Pair(0, 0), Pair(0, 0)),
     val attributesAST: AttributesAST
-)  : AstNode, Visitable() {
-    override val id: NodeId = AstNode.getId()
+) : AstNodeI, Visitable() {
+    override val id: NodeId = AstNodeI.getId()
 
     override fun checkNode(
         syntaxErrorListener: SyntaxErrorListener,
         semanticErrorListener: SemanticErrorListener,
-        scope: SymbolTableInterface
+        queryInfo: SymbolTableInterface
     ) {
         TODO("Not yet implemented")
     }

@@ -7,14 +7,14 @@ import tsql.ast.types.EType
 import tsql.error.SemanticErrorListener
 import tsql.error.SyntaxErrorListener
 
-class AtOperationAST (
+class AtOperationAST(
     val literalValueAST: LiteralValueAST
-)  : AstNode, Visitable()  {
-    override val id: NodeId = AstNode.getId()
+) : AstNodeI, Visitable() {
+    override val id: NodeId = AstNodeI.getId()
     override fun checkNode(
         syntaxErrorListener: SyntaxErrorListener,
         semanticErrorListener: SemanticErrorListener,
-        scope: SymbolTableInterface
+        queryInfo: SymbolTableInterface
     ) {
         TODO("Not yet implemented")
     }

@@ -21,7 +21,7 @@ enum class EType(s: String) {
 
     fun isNumeric(): Boolean {
         return when (this) {
-            BIGINT, NUM, DECIMAL, FLOAT, DOUBLE, LONG -> true
+            BIGINT, NUM, DECIMAL, FLOAT, DOUBLE, LONG, INT -> true
             else -> false
         }
     }

@@ -7,17 +7,17 @@ import tsql.database.Table
 import tsql.error.SemanticErrorListener
 import tsql.error.SyntaxErrorListener
 
-class TableAST (
+class TableAST(
     val name: String,
     val alias: String = ""
-)  : AstNode, Visitable(), DataSourceI {
-    override val id: NodeId = AstNode.getId()
+) : AstNodeI, Visitable(), DataSourceI {
+    override val id: NodeId = AstNodeI.getId()
     var table: Table? = null
 
     override fun checkNode(
         syntaxErrorListener: SyntaxErrorListener,
         semanticErrorListener: SemanticErrorListener,
-        scope: SymbolTableInterface
+        queryInfo: SymbolTableInterface
     ) {
         TODO("Not yet implemented")
     }

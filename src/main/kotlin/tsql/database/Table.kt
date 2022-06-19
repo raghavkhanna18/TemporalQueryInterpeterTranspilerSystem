@@ -86,6 +86,9 @@ class Table(
     }
 
     fun filter(conditions: Pair<MutableList<EBinOp>, MutableList<Condition>>) {
+        if (conditions.second.isEmpty()) {
+            return
+        }
         val conditionFunctions = conditions.second.map { createFilterCondition(it) }.toMutableList()
         conditionFunctions.reverse()
         val conjunctions = conditions.first.toMutableList()
@@ -95,10 +98,17 @@ class Table(
             tempConditions.addAll(conditionFunctions)
         } else {
             for (i in conjunctions.indices) {
-                if (conjunctions[i] == EBinOp.AND) {
+                if (conjunctions[i] == EBinOp.AND && i < conjunctions.size - 1) {
                     tempConditions.add(fun(row: Row): Boolean {
                         return conditionFunctions[i](row) && conditionFunctions[i + 1](row)
                     })
+                } else if (conjunctions[i] == EBinOp.AND) {
+                    tempConditions.add(fun(row: Row): Boolean {
+                        return conditionFunctions[i](row)
+                    })
+                } else if (i < conjunctions.size - 1) {
+                    tempConditions.add(conditionFunctions[i])
+                    tempConditions.add(conditionFunctions[i + 1])
                 } else {
                     tempConditions.add(conditionFunctions[i])
                 }
@@ -123,6 +133,13 @@ class Table(
             if (condition.lhsType == EType.INT && condition.rhsType == EType.INT) {
                 return convertToFunction(condition.lhs.toInt(), condition.rhs.toInt(), condition.comparator)
             }
+            if (condition.lhsType == EType.BIGINT && condition.rhsType == EType.BIGINT) {
+                return convertToFunction(
+                    condition.lhs.toBigInteger(),
+                    condition.rhs.toBigInteger(),
+                    condition.comparator
+                )
+            }
             if (condition.lhsType == EType.DOUBLE && condition.rhsType == EType.DOUBLE) {
                 return convertToFunction(condition.lhs.toDouble(), condition.rhs.toDouble(), condition.comparator)
             }
@@ -136,6 +153,13 @@ class Table(
                 return convertToFunction(
                     condition.lhs.toBigInteger(),
                     condition.rhs.toBigInteger(),
+                    condition.comparator
+                )
+            }
+            if (condition.lhsType == EType.INT && condition.rhsType == EType.INT) {
+                return convertToFunction(
+                    condition.lhs.toInt(),
+                    condition.rhs.toInt(),
                     condition.comparator
                 )
             }
@@ -178,6 +202,11 @@ class Table(
             if (condition.lhsType == EType.BIGINT && condition.rhsType == EType.BIGINT) {
                 return convertToFunctionIndex(
                     getColumnIndex(condition.lhs), condition.rhs.toBigInteger(), condition.comparator
+                )
+            }
+            if (condition.lhsType == EType.INT && condition.rhsType == EType.INT) {
+                return convertToFunctionIndex(
+                    getColumnIndex(condition.lhs), condition.rhs.toInt(), condition.comparator
                 )
             }
             if (condition.lhsType == EType.DECIMAL && condition.rhsType == EType.DECIMAL) {

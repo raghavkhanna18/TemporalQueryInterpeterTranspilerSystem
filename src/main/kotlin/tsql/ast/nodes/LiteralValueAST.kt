@@ -18,9 +18,9 @@ class LiteralValueAST (
     override fun checkNode(
         syntaxErrorListener: SyntaxErrorListener,
         semanticErrorListener: SemanticErrorListener,
-        scope: SymbolTableInterface
+        queryInfo: SymbolTableInterface
     ) {
-        super.checkNode(syntaxErrorListener, semanticErrorListener, scope)
+        super.checkNode(syntaxErrorListener, semanticErrorListener, queryInfo)
     }
 }
 

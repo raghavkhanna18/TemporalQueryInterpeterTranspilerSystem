@@ -9,43 +9,52 @@ import tsql.error.SemanticErrorListener
 import tsql.error.SyntaxErrorListener
 
 class WhereOperationAST(
-    // override val position: Pair<Pair<Int, Int>, Pair<Int, Int>> = Pair(Pair(0, 0), Pair(0, 0)),
-    val lhs: WhereExpressionAST,
+    val lhs: WhereExpressionAST?,
     val rhs: WhereOperationAST? = null,
+    val rhsNested: Boolean = false,
     val conjuction: EBinOp? = null
-)  : AstNode, Visitable() {
-    override val id: NodeId = AstNode.getId()
+) : AstNodeI, Visitable() {
+    override val id: NodeId = AstNodeI.getId()
 
     override fun checkNode(
         syntaxErrorListener: SyntaxErrorListener,
         semanticErrorListener: SemanticErrorListener,
-        scope: SymbolTableInterface
+        queryInfo: SymbolTableInterface
     ) {
         TODO("Not yet implemented")
     }
 
     override fun execute(dataSourceI: DataSourceI?): DataSourceI? {
-        if (dataSourceI == null) {
-            return dataSourceI
+
+        var dataSource = dataSourceI
+
+        if (rhs != null && (rhsNested || rhs.rhsNested)) {
+            dataSource = rhs.execute(dataSource)
+        } else if (lhs == null && rhs != null) {
+            dataSource = rhs.execute(dataSource)
+            return dataSource
+        }
+        if (dataSource == null) {
+            return dataSource
         }
         val conditions = this.flatten()
-        conditions.second.map { updateConditionType(it, dataSourceI) }
-        when(dataSourceI){
+        conditions.second.map { updateConditionType(it, dataSource) }
+        when (dataSource) {
             is Table -> {
-                dataSourceI.filter(conditions)
+                dataSource.filter(conditions)
             }
         }
-        return dataSourceI
+        return dataSource
     }
 
     fun flatten(): Pair<MutableList<EBinOp>, MutableList<Condition>> {
-        if (rhs != null && conjuction != null) {
+        if (rhs != null && conjuction != null && !rhsNested && lhs != null) {
             val flat_rhs = rhs.flatten()
             flat_rhs.first.add(conjuction)
             flat_rhs.second.add(lhs.toCondition())
             return Pair(flat_rhs.first, flat_rhs.second)
         }
-        return Pair(mutableListOf(), mutableListOf(lhs.toCondition()))
+        return Pair(mutableListOf(), if (lhs != null) mutableListOf(lhs.toCondition()) else mutableListOf())
     }
 
     fun updateConditionType(condition: Condition, dataSource: DataSourceI) {

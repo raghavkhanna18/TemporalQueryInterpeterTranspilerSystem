@@ -9,13 +9,13 @@ import tsql.error.SyntaxErrorListener
 class ComparatorAST(
     // override val position: Pair<Pair<Int, Int>, Pair<Int, Int>>
     val comparator: EBinOp
-    ) : AstNode, Visitable() {
-    override val id: NodeId = AstNode.getId()
+) : AstNodeI, Visitable() {
+    override val id: NodeId = AstNodeI.getId()
 
     override fun checkNode(
         syntaxErrorListener: SyntaxErrorListener,
         semanticErrorListener: SemanticErrorListener,
-        scope: SymbolTableInterface
+        queryInfo: SymbolTableInterface
     ) {
         TODO("Not yet implemented")
     }

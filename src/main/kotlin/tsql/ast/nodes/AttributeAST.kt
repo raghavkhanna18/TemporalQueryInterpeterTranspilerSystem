@@ -13,13 +13,13 @@ open class AttributeAST(
     val tableName: String = "",
     val rename: String = value,
     var type: EType = EType.STRING
-) : AstNode,
+) : AstNodeI,
     Visitable() {
-    override val id: NodeId = AstNode.getId()
+    override val id: NodeId = AstNodeI.getId()
     override fun checkNode(
         syntaxErrorListener: SyntaxErrorListener,
         semanticErrorListener: SemanticErrorListener,
-        scope: SymbolTableInterface
+        queryInfo: SymbolTableInterface
     ) {
         TODO("Not yet implemented")
     }

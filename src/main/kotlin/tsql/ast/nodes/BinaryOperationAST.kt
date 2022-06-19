@@ -6,18 +6,18 @@ import tsql.database.Table
 import tsql.error.SemanticErrorListener
 import tsql.error.SyntaxErrorListener
 
-class BinaryOperationAST  (
+class BinaryOperationAST(
     // override val position: Pair<Pair<Int, Int>, Pair<Int, Int>> = Pair(Pair(0, 0), Pair(0, 0)),
     val operator: BinaryOperatorAST,
     val lhs: DataSourceI,
     val rhs: DataSourceI
-)  : AstNode, Visitable(), DataSourceI {
-    override val id: NodeId = AstNode.getId()
+) : AstNodeI, Visitable(), DataSourceI {
+    override val id: NodeId = AstNodeI.getId()
 
     override fun checkNode(
         syntaxErrorListener: SyntaxErrorListener,
         semanticErrorListener: SemanticErrorListener,
-        scope: SymbolTableInterface
+        queryInfo: SymbolTableInterface
     ) {
         TODO("Not yet implemented")
     }
