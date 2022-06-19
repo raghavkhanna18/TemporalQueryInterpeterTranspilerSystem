@@ -1,7 +1,6 @@
 package tsql.ast.nodes
 
 import tsql.ast.symbol_table.SymbolTable
-import tsql.error.SemanticErrorListener
 import tsql.error.SyntaxErrorListener
 
 typealias NodeId = Int
@@ -11,7 +10,6 @@ interface AstNodeI {
 
     fun checkNode(
         syntaxErrorListener: SyntaxErrorListener,
-        semanticErrorListener: SemanticErrorListener,
         queryInfo: SymbolTable
     )
 

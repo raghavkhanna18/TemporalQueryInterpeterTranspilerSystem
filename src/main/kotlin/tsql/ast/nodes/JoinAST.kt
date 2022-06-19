@@ -3,7 +3,6 @@ package tsql.ast.nodes
 import tsql.Utils.MAX_TIME
 import tsql.Utils.MIN_TIME
 import tsql.Utils.TIME_UNITS
-import tsql.ast.nodes.visitor.Visitable
 import tsql.ast.symbol_table.SymbolTable
 import tsql.ast.types.EBinOp
 import tsql.ast.types.EType
@@ -12,7 +11,6 @@ import tsql.database.Row
 import tsql.database.Table
 import tsql.decrementTime
 import tsql.error.SemanticError
-import tsql.error.SemanticErrorListener
 import tsql.error.SyntaxErrorListener
 import tsql.getOverlapContion
 import tsql.getTimeUnitString
@@ -28,19 +26,18 @@ class JoinAST(
     val leftAttributeAST: AttributeAST,
     val rightAttributeAST: AttributeAST
 
-) : AstNodeI, Visitable(), DataSourceI {
+) : AstNodeI,  DataSourceI {
     override val id: NodeId = AstNodeI.getId()
     val maxTime = MAX_TIME
     val minTime = MIN_TIME
     override fun checkNode(
         syntaxErrorListener: SyntaxErrorListener,
-        semanticErrorListener: SemanticErrorListener,
         queryInfo: SymbolTable
     ) {
-        left.checkNode(syntaxErrorListener, semanticErrorListener, queryInfo)
-        right.checkNode(syntaxErrorListener, semanticErrorListener, queryInfo)
-        leftAttributeAST.checkNode(syntaxErrorListener, semanticErrorListener, queryInfo)
-        rightAttributeAST.checkNode(syntaxErrorListener, semanticErrorListener, queryInfo)
+        left.checkNode(syntaxErrorListener, queryInfo)
+        right.checkNode(syntaxErrorListener, queryInfo)
+        leftAttributeAST.checkNode(syntaxErrorListener, queryInfo)
+        rightAttributeAST.checkNode(syntaxErrorListener, queryInfo)
     }
 
     fun execMergeJoin(

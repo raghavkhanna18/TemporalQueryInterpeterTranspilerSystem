@@ -1,7 +1,8 @@
-package tsql.ast.nodes
+package tsql.ast.constructors
 
 import antlr.TSQLParser
 import antlr.TSQLParserBaseVisitor
+import tsql.ast.nodes.WhereOperationAST
 import tsql.ast.types.EBinOp
 import tsql.error.SyntaxErrorListener
 

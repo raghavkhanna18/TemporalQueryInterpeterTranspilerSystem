@@ -2,22 +2,19 @@ package tsql.ast.nodes
 
 import tsql.ast.nodes.visitor.Visitable
 import tsql.ast.symbol_table.SymbolTable
-import tsql.error.SemanticErrorListener
 import tsql.error.SyntaxErrorListener
 import java.lang.IllegalArgumentException
 
 class SelectAST(
-    // override val position: Pair<Pair<Int, Int>, Pair<Int, Int>> = Pair(Pair(0, 0), Pair(0, 0)),
     val attributesAST: AttributesAST
 ) : AstNodeI, Visitable() {
     override val id: NodeId = AstNodeI.getId()
 
     override fun checkNode(
         syntaxErrorListener: SyntaxErrorListener,
-        semanticErrorListener: SemanticErrorListener,
         queryInfo: SymbolTable
     ) {
-        attributesAST.checkNode(syntaxErrorListener, semanticErrorListener, queryInfo)
+        attributesAST.checkNode(syntaxErrorListener, queryInfo)
     }
 
     override fun execute(dataSourceI: DataSourceI?): DataSourceI? {

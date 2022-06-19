@@ -1,15 +1,14 @@
-package tsql.ast.nodes
+package tsql.ast.constructors
 
 import antlr.TSQLParser
 import antlr.TSQLParserBaseVisitor
+import tsql.ast.nodes.JoinAST
 import tsql.error.SyntaxErrorListener
 
 class JoinConstructor(val syntaxErrorListener: SyntaxErrorListener) : TSQLParserBaseVisitor<JoinAST>() {
     override fun visitJoin_operation(ctx: TSQLParser.Join_operationContext): JoinAST {
         return JoinAST(
-            // Pair(
-            //     Pair(ctx.start.line, ctx.start.charPositionInLine), Pair(ctx.stop.line, ctx.stop.charPositionInLine)
-            // ),
+
             ctx.join_operator().accept(JoinOperatorConstructor(syntaxErrorListener)),
             ctx.table().first().accept(TableConstructor(syntaxErrorListener)),
             ctx.table().last().accept(TableConstructor(syntaxErrorListener)),

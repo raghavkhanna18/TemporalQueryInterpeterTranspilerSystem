@@ -7,7 +7,6 @@ import tsql.ast.symbol_table.SymbolTable
 import tsql.ast.types.EBinOp
 import tsql.ast.types.EType
 import tsql.error.SemanticError
-import tsql.error.SemanticErrorListener
 import tsql.error.SyntaxErrorListener
 import java.math.BigDecimal
 import java.math.BigInteger
@@ -23,7 +22,6 @@ class Table(
     override val id: NodeId = AstNodeI.getId()
     override fun checkNode(
         syntaxErrorListener: SyntaxErrorListener,
-        semanticErrorListener: SemanticErrorListener,
         queryInfo: SymbolTable
     ) {
         TODO("Not yet implemented")

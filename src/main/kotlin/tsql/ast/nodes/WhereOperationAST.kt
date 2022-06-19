@@ -1,11 +1,9 @@
 package tsql.ast.nodes
 
-import tsql.ast.nodes.visitor.Visitable
 import tsql.ast.symbol_table.SymbolTable
 import tsql.ast.types.EBinOp
 import tsql.database.Condition
 import tsql.database.Table
-import tsql.error.SemanticErrorListener
 import tsql.error.SyntaxErrorListener
 
 class WhereOperationAST(
@@ -13,12 +11,11 @@ class WhereOperationAST(
     val rhs: WhereOperationAST? = null,
     val rhsNested: Boolean = false,
     val conjuction: EBinOp? = null
-) : AstNodeI, Visitable() {
+) : AstNodeI {
     override val id: NodeId = AstNodeI.getId()
 
     override fun checkNode(
         syntaxErrorListener: SyntaxErrorListener,
-        semanticErrorListener: SemanticErrorListener,
         queryInfo: SymbolTable
     ) {
         return

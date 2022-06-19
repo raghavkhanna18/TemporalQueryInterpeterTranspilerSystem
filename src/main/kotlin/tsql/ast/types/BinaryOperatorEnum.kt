@@ -1,4 +1,4 @@
-package tsql.ast.nodes
+package tsql.ast.types
 
 enum class BinaryOperatorEnum(s: String) {
     TIMES("TIMES"),

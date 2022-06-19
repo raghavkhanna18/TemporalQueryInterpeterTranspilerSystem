@@ -1,7 +1,8 @@
-package tsql.ast.nodes
+package tsql.ast.constructors
 
 import antlr.TSQLParser
 import antlr.TSQLParserBaseVisitor
+import tsql.ast.nodes.BinaryOperationAST
 import tsql.error.SyntaxErrorListener
 
 class BinaryOperationConstructor(val syntaxErrorListener: SyntaxErrorListener) :

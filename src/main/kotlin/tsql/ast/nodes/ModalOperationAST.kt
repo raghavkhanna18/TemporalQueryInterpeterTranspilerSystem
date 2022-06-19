@@ -4,24 +4,22 @@ import tsql.Utils.MIN_TIME
 import tsql.Utils.MAX_TIME
 import tsql.Utils.TIME_UNITS
 import tsql.Utils.CURRENT_TIME
-import tsql.ast.nodes.visitor.Visitable
 import tsql.ast.symbol_table.SymbolTable
+import tsql.ast.types.EModalOperation
 import tsql.database.Row
 import tsql.database.Table
 import tsql.decrementTime
-import tsql.error.SemanticErrorListener
 import tsql.error.SyntaxErrorListener
 import tsql.incrementTime
 import kotlin.math.min
 
 class ModalOperationAST(
     val operation: EModalOperation
-) : AstNodeI, Visitable() {
+) : AstNodeI {
     override val id: NodeId = AstNodeI.getId()
 
     override fun checkNode(
         syntaxErrorListener: SyntaxErrorListener,
-        semanticErrorListener: SemanticErrorListener,
         queryInfo: SymbolTable
     ) {
         TODO("Not yet implemented")

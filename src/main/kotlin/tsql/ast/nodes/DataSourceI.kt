@@ -1,8 +1,5 @@
 package tsql.ast.nodes
 
-import tsql.ast.symbol_table.SymbolTable
-import tsql.database.Table
-
 interface DataSourceI : Cloneable, AstNodeI {
     fun getData(): DataSourceI
     fun getDataSortedBy(attribute: String, asc: Boolean = true): DataSourceI {

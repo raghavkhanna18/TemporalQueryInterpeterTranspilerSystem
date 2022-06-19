@@ -1,9 +1,7 @@
 package tsql.ast.nodes
 
-import tsql.ast.nodes.visitor.Visitable
 import tsql.ast.symbol_table.SymbolTable
 import tsql.ast.types.EType
-import tsql.error.SemanticErrorListener
 import tsql.error.SyntaxErrorListener
 
 open class AttributeAST(
@@ -12,12 +10,10 @@ open class AttributeAST(
     var tableName: String = "",
     var rename: String = value,
     var type: EType = EType.STRING
-) : AstNodeI,
-    Visitable() {
+) : AstNodeI {
     override val id: NodeId = AstNodeI.getId()
     override fun checkNode(
         syntaxErrorListener: SyntaxErrorListener,
-        semanticErrorListener: SemanticErrorListener,
         queryInfo: SymbolTable
     ) {
         if (tableName != "" && !isLiteral) {

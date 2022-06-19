@@ -10,10 +10,9 @@ import org.antlr.v4.runtime.ParserRuleContext
 import org.antlr.v4.runtime.tree.ParseTree
 import org.antlr.v4.runtime.tree.Trees
 import tsql.ast.nodes.ProgramAST
-import tsql.ast.nodes.ProgramConstructor
+import tsql.ast.constructors.ProgramConstructor
 import tsql.ast.symbol_table.SymbolTable
 import tsql.error.ErrorAccumulator
-import tsql.error.SemanticErrorListener
 import tsql.error.SyntaxErrorListener
 
 typealias TSQLParseTree = TSQLParser.ProgramContext
@@ -21,19 +20,11 @@ typealias TSQLParseTree = TSQLParser.ProgramContext
 fun buildCST(parser: TSQLParser): TSQLParseTree {
     val root: ParseTree = parser.program()
     println(printSyntaxTree(parser, root))
-    println("test")
     return root as TSQLParseTree
 }
 
 fun buildAST(parseTree: TSQLParseTree, syntaxErrorListener: SyntaxErrorListener): ProgramAST {
     return parseTree.accept(ProgramConstructor(syntaxErrorListener)) as ProgramAST
-}
-
-// Create a TSQLParser parse tree for an input string
-fun constructParser(syntaxErrorAccumulator: ErrorAccumulator, inputString: String): TSQLParser {
-    val syntaxErrorListener = SyntaxErrorListener(syntaxErrorAccumulator)
-    val charStream = CharStreams.fromString(inputString)
-    return constructParser(syntaxErrorListener, charStream)
 }
 
 fun constructParser(syntaxErrorListener: SyntaxErrorListener, charStream: CharStream): TSQLParser {
@@ -52,7 +43,7 @@ fun constructParser(syntaxErrorListener: SyntaxErrorListener, charStream: CharSt
 
 fun constructAndCreateAST(syntaxErrorAccumulator: ErrorAccumulator, semanticErrorAccumulator: ErrorAccumulator, input: String): ProgramAST {
     val charStream = CharStreams.fromString(input)
-    val ast = createAST(syntaxErrorAccumulator, semanticErrorAccumulator, charStream)
+    val ast = createAST(syntaxErrorAccumulator, charStream)
     val table = ast.execute()
     table?.print()
 
@@ -62,11 +53,9 @@ fun constructAndCreateAST(syntaxErrorAccumulator: ErrorAccumulator, semanticErro
 
 private fun createAST(
     syntaxErrorAccumulator: ErrorAccumulator,
-    semanticErrorAccumulator: ErrorAccumulator,
     charStream: CharStream
 ): ProgramAST {
     val syntaxErrorListener = SyntaxErrorListener(syntaxErrorAccumulator)
-    val semanticErrorListener = SemanticErrorListener(semanticErrorAccumulator)
 
     // Create parser and construct parse tree
     val parser: TSQLParser =
@@ -78,7 +67,7 @@ private fun createAST(
 
     // Perform semantic analysis
     val symbolTable = SymbolTable()
-    absSynTree.checkNode(syntaxErrorListener, semanticErrorListener, symbolTable)
+    absSynTree.checkNode(syntaxErrorListener, symbolTable)
     val table = absSynTree.toSQL(symbolTable)
     println(table.first)
     return absSynTree

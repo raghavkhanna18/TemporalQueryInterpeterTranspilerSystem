@@ -1,7 +1,8 @@
-package tsql.ast.nodes
+package tsql.ast.constructors
 
 import antlr.TSQLParser
 import antlr.TSQLParserBaseVisitor
+import tsql.ast.nodes.StatementAST
 import tsql.error.SyntaxErrorListener
 
 class StatementConstructor(val syntaxErrorListener: SyntaxErrorListener) : TSQLParserBaseVisitor<StatementAST>() {

@@ -1,26 +1,22 @@
 package tsql.ast.nodes
 
-import tsql.ast.nodes.visitor.Visitable
 import tsql.ast.symbol_table.SymbolTable
 import tsql.database.Table
 import tsql.error.SemanticError
-import tsql.error.SemanticErrorListener
 import tsql.error.SyntaxErrorListener
 
 class UnionStatementAST(
     val statementA: StatementAST,
     val statementB: StatementAST? = null
-) : AstNodeI,
-    Visitable() {
+) : AstNodeI {
     override val id: NodeId = AstNodeI.getId()
 
     override fun checkNode(
         syntaxErrorListener: SyntaxErrorListener,
-        semanticErrorListener: SemanticErrorListener,
         queryInfo: SymbolTable
     ) {
-        statementA.checkNode(syntaxErrorListener, semanticErrorListener, queryInfo)
-        statementB?.checkNode(syntaxErrorListener, semanticErrorListener, queryInfo)
+        statementA.checkNode(syntaxErrorListener, queryInfo)
+        statementB?.checkNode(syntaxErrorListener, queryInfo)
     }
 
     override fun execute(dataSourceI: DataSourceI?): DataSourceI? {

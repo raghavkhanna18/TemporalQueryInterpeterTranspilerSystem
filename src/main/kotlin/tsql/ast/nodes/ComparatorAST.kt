@@ -1,19 +1,16 @@
 package tsql.ast.nodes
 
-import tsql.ast.nodes.visitor.Visitable
 import tsql.ast.symbol_table.SymbolTable
 import tsql.ast.types.EBinOp
-import tsql.error.SemanticErrorListener
 import tsql.error.SyntaxErrorListener
 
 class ComparatorAST(
     val comparator: EBinOp
-) : AstNodeI, Visitable() {
+) : AstNodeI {
     override val id: NodeId = AstNodeI.getId()
 
     override fun checkNode(
         syntaxErrorListener: SyntaxErrorListener,
-        semanticErrorListener: SemanticErrorListener,
         queryInfo: SymbolTable
     ) {
         return

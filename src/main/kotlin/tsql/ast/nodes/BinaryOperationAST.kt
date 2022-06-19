@@ -1,12 +1,11 @@
 package tsql.ast.nodes
 
 import tsql.Utils
-import tsql.ast.nodes.visitor.Visitable
 import tsql.ast.symbol_table.SymbolTable
+import tsql.ast.types.BinaryOperatorEnum
 import tsql.database.Row
 import tsql.database.Table
 import tsql.decrementTime
-import tsql.error.SemanticErrorListener
 import tsql.error.SyntaxErrorListener
 import tsql.getOverlapContion
 import tsql.getTimeUnitString
@@ -19,7 +18,7 @@ class BinaryOperationAST(
     val operator: BinaryOperatorAST,
     val lhs: DataSourceI,
     val rhs: DataSourceI
-) : AstNodeI, Visitable(), DataSourceI {
+) : AstNodeI, DataSourceI {
 
 
 
@@ -28,11 +27,10 @@ class BinaryOperationAST(
     val minTime = Utils.MIN_TIME
     override fun checkNode(
         syntaxErrorListener: SyntaxErrorListener,
-        semanticErrorListener: SemanticErrorListener,
         queryInfo: SymbolTable
     ) {
-        lhs.checkNode(syntaxErrorListener, semanticErrorListener, queryInfo)
-        rhs.checkNode(syntaxErrorListener, semanticErrorListener, queryInfo)
+        lhs.checkNode(syntaxErrorListener, queryInfo)
+        rhs.checkNode(syntaxErrorListener, queryInfo)
 
     }
 

@@ -1,22 +1,19 @@
 package tsql.ast.nodes
 
-import tsql.ast.nodes.visitor.Visitable
 import tsql.ast.symbol_table.SymbolTable
 import tsql.database.Query
 import tsql.database.Table
-import tsql.error.SemanticErrorListener
 import tsql.error.SyntaxErrorListener
 
 class TableAST(
     val name: String,
     var alias: String = ""
-) : AstNodeI, Visitable(), DataSourceI {
+) : AstNodeI, DataSourceI {
     override val id: NodeId = AstNodeI.getId()
     var table: Table? = null
 
     override fun checkNode(
         syntaxErrorListener: SyntaxErrorListener,
-        semanticErrorListener: SemanticErrorListener,
         queryInfo: SymbolTable
     ) {
         alias = alias.removePrefix("'")

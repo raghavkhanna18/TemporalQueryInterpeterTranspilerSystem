@@ -1,7 +1,9 @@
-package tsql.ast.nodes
+package tsql.ast.constructors
 
 import antlr.TSQLParser
 import antlr.TSQLParserBaseVisitor
+import tsql.ast.nodes.AttributeAST
+import tsql.ast.nodes.AttributesAST
 import tsql.error.SyntaxErrorListener
 
 class AttributesConstructor(val syntaxErrorListener: SyntaxErrorListener) : TSQLParserBaseVisitor<AttributesAST>() {
@@ -14,10 +16,6 @@ class AttributesConstructor(val syntaxErrorListener: SyntaxErrorListener) : TSQL
             )
         }
         return AttributesAST(
-            // Pair(
-            //     Pair(ctx.start.line, ctx.start.charPositionInLine),
-            //     Pair(ctx.stop.line, ctx.stop.charPositionInLine + ctx.stop.text.length)
-            // ),
             attributes
         )
     }

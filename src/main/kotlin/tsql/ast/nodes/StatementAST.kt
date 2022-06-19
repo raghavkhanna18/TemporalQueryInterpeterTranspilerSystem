@@ -1,30 +1,25 @@
 package tsql.ast.nodes
 
-import tsql.ast.nodes.visitor.Visitable
 import tsql.ast.symbol_table.SymbolTable
-import tsql.error.SemanticErrorListener
 import tsql.error.SyntaxErrorListener
 
 class StatementAST(
-    // override val position: Pair<Pair<Int, Int>, Pair<Int, Int>>,
     val selectAST: SelectAST,
     val dataSourceAST: AstNodeI,
     val whereOperationAST: WhereOperationAST?,
     val modalOperationAST: ModalOperationAST?,
     val atOperationAST: AtOperationAST?
-) : AstNodeI,
-    Visitable() {
+) : AstNodeI {
     override val id: NodeId = AstNodeI.getId()
 
     override fun checkNode(
         syntaxErrorListener: SyntaxErrorListener,
-        semanticErrorListener: SemanticErrorListener,
         queryInfo: SymbolTable
     ) {
-        dataSourceAST.checkNode(syntaxErrorListener, semanticErrorListener, queryInfo)
-        modalOperationAST?.checkNode(syntaxErrorListener, semanticErrorListener, queryInfo)
-        whereOperationAST?.checkNode(syntaxErrorListener, semanticErrorListener, queryInfo)
-        selectAST.checkNode(syntaxErrorListener, semanticErrorListener, queryInfo)
+        dataSourceAST.checkNode(syntaxErrorListener, queryInfo)
+        modalOperationAST?.checkNode(syntaxErrorListener, queryInfo)
+        whereOperationAST?.checkNode(syntaxErrorListener, queryInfo)
+        selectAST.checkNode(syntaxErrorListener, queryInfo)
     }
 
     override fun execute(dataSourceI: DataSourceI?): DataSourceI? {
@@ -33,7 +28,7 @@ class StatementAST(
         val modalData = if (modalOperationAST != null) modalOperationAST.execute(baseData) else baseData
         val filteredData = if (whereOperationAST != null) whereOperationAST.execute(modalData) else modalData
         val projectedData =  selectAST.execute(filteredData)
-            // projectedData!!.coalesce()
+            projectedData!!.coalesce()
         return projectedData
     }
 
