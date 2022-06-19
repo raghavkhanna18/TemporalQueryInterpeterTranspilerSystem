@@ -10,7 +10,7 @@ class ProgramConstructor(val syntaxErrorListener: SyntaxErrorListener) : TSQLPar
     override fun visitProgram(ctx: TSQLParser.ProgramContext): ProgramAST {
         lateinit var program: ProgramAST
         program = ProgramAST()
-        println(ctx.toStringTree())
+        // println(ctx.toStringTree())
         program.statementList.add(
             ctx.union_statement().accept(UnionStatementConstructor(syntaxErrorListener))
         )

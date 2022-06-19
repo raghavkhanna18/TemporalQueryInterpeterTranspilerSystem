@@ -19,7 +19,7 @@ typealias TSQLParseTree = TSQLParser.ProgramContext
 
 fun buildCST(parser: TSQLParser): TSQLParseTree {
     val root: ParseTree = parser.program()
-    println(printSyntaxTree(parser, root))
+    // println(printSyntaxTree(parser, root))
     return root as TSQLParseTree
 }
 
@@ -41,19 +41,18 @@ fun constructParser(syntaxErrorListener: SyntaxErrorListener, charStream: CharSt
     return parser
 }
 
-fun constructAndCreateAST(syntaxErrorAccumulator: ErrorAccumulator, input: String): ProgramAST {
+fun constructAndCreateAST(syntaxErrorAccumulator: ErrorAccumulator, input: String): Pair<ProgramAST, SymbolTable> {
     val charStream = CharStreams.fromString(input)
-    val ast = createAST(syntaxErrorAccumulator, charStream)
+    val astSymbolTable = createAST(syntaxErrorAccumulator, charStream)
 
-
-    return ast
+    return astSymbolTable
 }
 
 
 private fun createAST(
     syntaxErrorAccumulator: ErrorAccumulator,
     charStream: CharStream
-): ProgramAST {
+): Pair<ProgramAST, SymbolTable> {
     val syntaxErrorListener = SyntaxErrorListener(syntaxErrorAccumulator)
 
     // Create parser and construct parse tree
@@ -67,9 +66,7 @@ private fun createAST(
     // Perform semantic analysis
     val symbolTable = SymbolTable()
     absSynTree.checkNode(syntaxErrorListener, symbolTable)
-    val table = absSynTree.toSQL(symbolTable)
-    println(table.first)
-    return absSynTree
+    return Pair(absSynTree, symbolTable)
     }
 
 fun printSyntaxTree(parser: Parser, root: ParseTree): String? {
