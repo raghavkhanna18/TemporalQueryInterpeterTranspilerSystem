@@ -2,7 +2,7 @@ package tsql.ast.nodes
 
 import tsql.Utils
 import tsql.ast.nodes.visitor.Visitable
-import tsql.ast.symbol_table.SymbolTableInterface
+import tsql.ast.symbol_table.SymbolTable
 import tsql.ast.types.EType
 import tsql.error.SemanticErrorListener
 import tsql.error.SyntaxErrorListener
@@ -14,7 +14,7 @@ class AtOperationAST(
     override fun checkNode(
         syntaxErrorListener: SyntaxErrorListener,
         semanticErrorListener: SemanticErrorListener,
-        queryInfo: SymbolTableInterface
+        queryInfo: SymbolTable
     ) {
         TODO("Not yet implemented")
     }
@@ -35,5 +35,18 @@ class AtOperationAST(
                 0
             }
         }
+    }
+
+    override fun toSQL(symbolTable: SymbolTable?): Pair<String, Pair<String, String>> {
+        val tableNames = symbolTable?.getTableNames() ?: mutableListOf()
+        val combinedString = ""
+        for ((name, alias) in tableNames){
+            var tableName = name
+            if (alias != ""){
+                tableName = alias
+            }
+            combinedString.plus("AND ${tableName}.start_time <= ${literalValueAST.toSQL()} ${tableName}.end_time > ${literalValueAST.toSQL()}")
+        }
+        return Pair(combinedString, Pair(combinedString, ""))
     }
 }

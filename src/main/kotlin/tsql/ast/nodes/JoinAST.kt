@@ -4,7 +4,7 @@ import tsql.Utils.MAX_TIME
 import tsql.Utils.MIN_TIME
 import tsql.Utils.TIME_UNITS
 import tsql.ast.nodes.visitor.Visitable
-import tsql.ast.symbol_table.SymbolTableInterface
+import tsql.ast.symbol_table.SymbolTable
 import tsql.ast.types.EBinOp
 import tsql.ast.types.EType
 import tsql.ast.types.JoinType
@@ -14,12 +14,14 @@ import tsql.decrementTime
 import tsql.error.SemanticError
 import tsql.error.SemanticErrorListener
 import tsql.error.SyntaxErrorListener
+import tsql.getOverlapContion
+import tsql.getTimeUnitString
 import tsql.incrementTime
 import kotlin.math.max
 import kotlin.math.min
+import tsql.overlap
 
 class JoinAST(
-    // override val position: Pair<Pair<Int, Int>, Pair<Int, Int>>,
     val joinType: JoinType,
     val left: DataSourceI,
     val right: DataSourceI,
@@ -33,9 +35,12 @@ class JoinAST(
     override fun checkNode(
         syntaxErrorListener: SyntaxErrorListener,
         semanticErrorListener: SemanticErrorListener,
-        queryInfo: SymbolTableInterface
+        queryInfo: SymbolTable
     ) {
-        TODO("Not yet implemented")
+        left.checkNode(syntaxErrorListener, semanticErrorListener, queryInfo)
+        right.checkNode(syntaxErrorListener, semanticErrorListener, queryInfo)
+        leftAttributeAST.checkNode(syntaxErrorListener, semanticErrorListener, queryInfo)
+        rightAttributeAST.checkNode(syntaxErrorListener, semanticErrorListener, queryInfo)
     }
 
     fun execMergeJoin(
@@ -89,11 +94,26 @@ class JoinAST(
                 val combinedTempData = leftRow.data.toMutableList()
                 combinedTempData.addAll(rightRow.data.toMutableList())
                 combinedTempRow.data = combinedTempData
-                if (compareLeftRight(EBinOp.GREATER, leftAttributeIndex, leftTable.numberOfColumns + rightAttributeIndex)(combinedTempRow)) {
+                if (compareLeftRight(
+                        EBinOp.GREATER,
+                        leftAttributeIndex,
+                        leftTable.numberOfColumns + rightAttributeIndex
+                    )(combinedTempRow)
+                ) {
                     j++
-                } else if (compareLeftRight(EBinOp.EQUAL, leftAttributeIndex, leftTable.numberOfColumns + rightAttributeIndex)(combinedTempRow) && !overlap(leftRow, rightRow)) {
+                } else if ((compareLeftRight(
+                        EBinOp.EQUAL,
+                        leftAttributeIndex,
+                        leftTable.numberOfColumns + rightAttributeIndex
+                    )(combinedTempRow)) && !overlap(leftRow, rightRow)
+                ) {
                     j++
-                } else if (compareLeftRight(EBinOp.EQUAL, leftAttributeIndex, leftTable.numberOfColumns + rightAttributeIndex)(combinedTempRow) && overlap(leftRow, rightRow)) {
+                } else if ((compareLeftRight(
+                        EBinOp.EQUAL,
+                        leftAttributeIndex,
+                        leftTable.numberOfColumns + rightAttributeIndex
+                    )(combinedTempRow)) && overlap(leftRow, rightRow)
+                ) {
                     val combinedRow = Row()
                     when (joinType) {
                         JoinType.LEFT -> {}
@@ -101,7 +121,7 @@ class JoinAST(
                         JoinType.UNTIL -> {
                             if ((leftRow.startTime != minTime || leftRow.endTime != minTime) && (rightRow.startTime != minTime || rightRow.endTime != minTime)) {
                                 var startTime = decrementTime(leftRow.startTime, TIME_UNITS)
-                                var endTime = decrementTime( min(leftRow.endTime, rightRow.endTime), TIME_UNITS)
+                                var endTime = decrementTime(min(leftRow.endTime, rightRow.endTime), TIME_UNITS)
                                 startTime = if (startTime < minTime) minTime else startTime
                                 endTime = if (endTime < minTime) minTime else endTime
                                 val combinedData = leftRow.data.toMutableList()
@@ -162,11 +182,56 @@ class JoinAST(
         return combinedTable
     }
 
+    override fun toSQL(symbolTable: SymbolTable?): Pair<String, Pair<String, String>> {
+        val leftSQL = left.toSQL(symbolTable)
+        val rightSQL = right.toSQL(symbolTable)
+        val leftTableSQL = leftSQL.first
+        val rightTableSQl = rightSQL.first
+        val joinSQL = convertJoinToSQL(symbolTable!!)
+        return Pair(
+            "$leftTableSQL JOIN  $rightTableSQl ON ${leftAttributeAST.toSQL(symbolTable).first} = ${
+                rightAttributeAST.toSQL(
+                    symbolTable
+                ).first
+            }", joinSQL.second
+        )
+    }
+
+    fun convertJoinToSQL(symbolTable: SymbolTable): Pair<String, Pair<String, String>> {
+        val tableNames = symbolTable.getTableNames()
+        val firstTable = tableNames.first()
+        val firstTableName = if (firstTable.second != "") firstTable.second else firstTable.first
+        val secondTable = tableNames.get(1)
+        val secondTableName = if (secondTable.second != "") secondTable.second else secondTable.first
+        val timeUnit = getTimeUnitString()
+        when (joinType) {
+            JoinType.SINCE -> {
+                val plusClause = "+ INTERVAL $timeUnit"
+                val additionalSelect =
+                    "(GREATEST($firstTableName.start_time, $secondTableName.start_time) $plusClause) AS s, ($firstTableName.end_time $plusClause) AS e"
+                return Pair("JOIN", Pair(getOverlapContion(symbolTable), additionalSelect))
+            }
+            JoinType.UNTIL -> {
+                val minusClause = "- INTERVAL $timeUnit"
+                val additionalSelect =
+                    "($firstTableName.start_time $minusClause) AS s, (LEAST($firstTableName.end_time, $secondTableName.end_time) $minusClause) AS e"
+                return Pair("JOIN", Pair(getOverlapContion(symbolTable), additionalSelect))
+            }
+            JoinType.INNER -> {
+                val additionalSelect =
+                    "GREATEST($firstTableName.start_time, $secondTableName.start_time) AS s, (LEAST($firstTableName.end_time, $secondTableName.end_time) AS e"
+                return Pair("JOIN", Pair(getOverlapContion(symbolTable), additionalSelect))
+            }
+            else -> {Pair("", Pair("",""))}
+        }
+        return Pair("", Pair("", ""))
+    }
+
     override fun execute(dataSourceI: DataSourceI?): DataSourceI? {
 
-        val leftTable = left.getDataSortedBy(leftAttributeAST.value, true)
+        val leftTable = left.getDataSortedBy(leftAttributeAST.value, true) as Table
         leftTable.name = leftAttributeAST.tableName
-        val rightTable = right.getDataSortedBy(rightAttributeAST.value)
+        val rightTable = right.getDataSortedBy(rightAttributeAST.value) as Table
         rightTable.name = rightAttributeAST.tableName
         val leftAttributeIndex = leftTable.getColumnIndex(leftAttributeAST.value)
         val rightAttributeIndex = rightTable.getColumnIndex(rightAttributeAST.value)
@@ -189,15 +254,13 @@ class JoinAST(
         )
     }
 
-    fun overlap(left: Row, right: Row): Boolean {
-        return left.startTime < right.endTime && right.startTime < left.endTime
-    }
+
 
     override fun getData(): Table {
-        TODO("Not yet implemented")
+        return this.execute() as Table
     }
 
     override fun clone(): Table {
-        TODO("Not yet implemented")
+        return this.execute() as Table
     }
 }

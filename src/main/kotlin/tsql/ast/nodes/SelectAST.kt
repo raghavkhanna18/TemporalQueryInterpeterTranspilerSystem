@@ -1,7 +1,7 @@
 package tsql.ast.nodes
 
 import tsql.ast.nodes.visitor.Visitable
-import tsql.ast.symbol_table.SymbolTableInterface
+import tsql.ast.symbol_table.SymbolTable
 import tsql.error.SemanticErrorListener
 import tsql.error.SyntaxErrorListener
 import java.lang.IllegalArgumentException
@@ -15,9 +15,9 @@ class SelectAST(
     override fun checkNode(
         syntaxErrorListener: SyntaxErrorListener,
         semanticErrorListener: SemanticErrorListener,
-        queryInfo: SymbolTableInterface
+        queryInfo: SymbolTable
     ) {
-        TODO("Not yet implemented")
+        attributesAST.checkNode(syntaxErrorListener, semanticErrorListener, queryInfo)
     }
 
     override fun execute(dataSourceI: DataSourceI?): DataSourceI? {
@@ -31,5 +31,10 @@ class SelectAST(
 
     fun getColumnNames() : List<String>{
         return attributesAST.getColumnNames()
+    }
+
+    override fun toSQL(symbolTable: SymbolTable?): Pair<String, Pair<String, String>> {
+        val attributes  = attributesAST.toSQL(symbolTable)
+        return Pair("SELECT ${attributes.first}", attributes.second)
     }
 }

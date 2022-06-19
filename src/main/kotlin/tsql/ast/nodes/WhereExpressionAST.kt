@@ -1,13 +1,12 @@
 package tsql.ast.nodes
 
 import tsql.ast.nodes.visitor.Visitable
-import tsql.ast.symbol_table.SymbolTableInterface
+import tsql.ast.symbol_table.SymbolTable
 import tsql.database.Condition
 import tsql.error.SemanticErrorListener
 import tsql.error.SyntaxErrorListener
 
 class WhereExpressionAST(
-    // override val position: Pair<Pair<Int, Int>, Pair<Int, Int>> = Pair(Pair(0, 0), Pair(0, 0)),
     val lhs: AttributeAST,
     val rhs: AttributeAST,
     val comparator: ComparatorAST
@@ -17,13 +16,13 @@ class WhereExpressionAST(
     override fun checkNode(
         syntaxErrorListener: SyntaxErrorListener,
         semanticErrorListener: SemanticErrorListener,
-        queryInfo: SymbolTableInterface
+        queryInfo: SymbolTable
     ) {
-        TODO("Not yet implemented")
+        return
     }
 
     override fun execute(dataSourceI: DataSourceI?): DataSourceI? {
-        TODO("Not yet implemented")
+        return dataSourceI
     }
 
     fun toCondition(): Condition {
@@ -36,5 +35,18 @@ class WhereExpressionAST(
             rhs.type,
             rhs.isLiteral
         )
+    }
+
+    override fun toSQL(symbolTable: SymbolTable?): Pair<String, Pair<String, String>> {
+        var lhsString = lhs.getColumnName()
+        var rhsString = rhs.getColumnName()
+        if (lhs.isLiteral && !lhs.type.isNumeric()){
+            lhsString = "'$lhsString'"
+        }
+        if (rhs.isLiteral && !rhs.type.isNumeric()){
+            rhsString = "'$rhsString'"
+
+        }
+        return Pair("$lhsString  ${comparator.toSQL(symbolTable).first} $rhsString", Pair("", ""))
     }
 }

@@ -55,6 +55,7 @@ fun constructAndCreateAST(syntaxErrorAccumulator: ErrorAccumulator, semanticErro
     val ast = createAST(syntaxErrorAccumulator, semanticErrorAccumulator, charStream)
     val table = ast.execute()
     table?.print()
+
     return ast
 }
 
@@ -77,8 +78,10 @@ private fun createAST(
 
     // Perform semantic analysis
     val symbolTable = SymbolTable()
-    // absSynTree.checkNode(syntaxErrorListener, semanticErrorListener, topLevelSymbolTable)
-        return absSynTree
+    absSynTree.checkNode(syntaxErrorListener, semanticErrorListener, symbolTable)
+    val table = absSynTree.toSQL(symbolTable)
+    println(table.first)
+    return absSynTree
     }
 
 fun printSyntaxTree(parser: Parser, root: ParseTree): String? {

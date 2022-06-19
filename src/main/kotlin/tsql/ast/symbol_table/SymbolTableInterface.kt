@@ -6,4 +6,5 @@ interface SymbolTableInterface {
     fun getColumnNamesForTable(tableName: String): List<String>
     fun getOrCreateTableAlias(tableName: String): String
     fun getTableNameFromAlias(alias: String): String
+    fun getTableNames(): List<Pair<String, String>>
 }

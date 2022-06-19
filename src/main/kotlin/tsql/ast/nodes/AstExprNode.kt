@@ -1,6 +1,7 @@
 package tsql.ast.nodes
 
 import tsql.ast.nodes.visitor.Visitable
+import tsql.ast.symbol_table.SymbolTable
 import tsql.ast.symbol_table.SymbolTableInterface
 import tsql.ast.types.AbstractType
 import tsql.error.SemanticErrorListener
@@ -19,7 +20,7 @@ abstract class AstExprNode : AstNodeI, Visitable() {
     override fun checkNode(
         syntaxErrorListener: SyntaxErrorListener,
         semanticErrorListener: SemanticErrorListener,
-        queryInfo: SymbolTableInterface
+        queryInfo: SymbolTable
     ) {
         checkExprNode(queryInfo, syntaxErrorListener, semanticErrorListener)
     }

@@ -1,7 +1,7 @@
 package tsql.ast.nodes
 
 import tsql.ast.nodes.visitor.Visitable
-import tsql.ast.symbol_table.SymbolTableInterface
+import tsql.ast.symbol_table.SymbolTable
 import tsql.error.SemanticErrorListener
 import tsql.error.SyntaxErrorListener
 
@@ -14,7 +14,7 @@ class CoalesceAST : AstNodeI, Visitable() {
     override fun checkNode(
         syntaxErrorListener: SyntaxErrorListener,
         semanticErrorListener: SemanticErrorListener,
-        queryInfo: SymbolTableInterface
+        queryInfo: SymbolTable
     ) {
         TODO("Not yet implemented")
     }

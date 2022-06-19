@@ -10,7 +10,20 @@ enum class EBinOp(val repr: String) {
     LESS("<"),
     LESS_EQUAL("<="),
     NOT_EQUAL("!="),
-    OR("OR"),
+    OR("OR");
+
+    override fun toString(): String {
+        return when(this){
+            AND -> " AND "
+            EQUAL -> "="
+            GREATER -> ">"
+            GREATER_EQUAL -> ">="
+            LESS -> "<"
+            LESS_EQUAL -> "<="
+            NOT_EQUAL -> "!="
+            OR -> " OR "
+        }
+    }
 
 
 }

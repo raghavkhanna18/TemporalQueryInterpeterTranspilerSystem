@@ -1,10 +1,11 @@
 package tsql.ast.nodes
 
+import tsql.ast.symbol_table.SymbolTable
 import tsql.database.Table
 
-interface DataSourceI : Cloneable{
-    fun getData(): Table
-    fun getDataSortedBy(attribute: String, asc: Boolean = true): Table {
+interface DataSourceI : Cloneable, AstNodeI {
+    fun getData(): DataSourceI
+    fun getDataSortedBy(attribute: String, asc: Boolean = true): DataSourceI {
         val table = getData()
         table.sort(attribute, asc)
         return table
@@ -16,7 +17,10 @@ interface DataSourceI : Cloneable{
     fun sort(attribute: String, asc: Boolean = true) {
     }
 
-    override fun clone(): Table
+    override fun clone(): DataSourceI
     fun print() {
+    }
+    fun coalesce(){
+
     }
 }

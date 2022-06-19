@@ -97,7 +97,7 @@ unary_operatoion:
     select_operator |  where_operation | at_operation | as_operation |  modal_operator;
 
 select_operator:
- SELECT_ (DISTINCT_ | ALL_)? attribute_list;
+ SELECT_  attribute_list;
 
 attribute:
     IDENTIFIER                                      # attri_identifier

@@ -1,9 +1,14 @@
 package tsql.database
 
+import tsql.ast.nodes.AstNodeI
 import tsql.ast.nodes.DataSourceI
+import tsql.ast.nodes.NodeId
+import tsql.ast.symbol_table.SymbolTable
 import tsql.ast.types.EBinOp
 import tsql.ast.types.EType
 import tsql.error.SemanticError
+import tsql.error.SemanticErrorListener
+import tsql.error.SyntaxErrorListener
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.time.Instant
@@ -15,6 +20,19 @@ class Table(
     var numberOfColumns: Int = 0,
     var name: String = ""
 ) : DataSourceI, Cloneable {
+    override val id: NodeId = AstNodeI.getId()
+    override fun checkNode(
+        syntaxErrorListener: SyntaxErrorListener,
+        semanticErrorListener: SemanticErrorListener,
+        queryInfo: SymbolTable
+    ) {
+        TODO("Not yet implemented")
+    }
+
+    override fun execute(dataSourceI: DataSourceI?): DataSourceI? {
+        TODO("Not yet implemented")
+    }
+
     fun putCollumns(numberOfColumns: Int, columnNames: MutableList<String>, columnTypes: MutableList<EType>) {
         this.numberOfColumns = numberOfColumns
         this.columnNames = columnNames
@@ -98,7 +116,7 @@ class Table(
             tempConditions.addAll(conditionFunctions)
         } else {
             for (i in conjunctions.indices) {
-                if (conjunctions[i] == EBinOp.AND && i < conjunctions.size - 1) {
+                if (conjunctions[i] == EBinOp.AND && i < conditionFunctions.size - 1) {
                     tempConditions.add(fun(row: Row): Boolean {
                         return conditionFunctions[i](row) && conditionFunctions[i + 1](row)
                     })
@@ -831,9 +849,23 @@ class Table(
             for (j in values.indices) {
                 print(values[j].toString() + " | ")
             }
-            System.out.println(
+            println(
                 " [" + Instant.ofEpochMilli(r.startTime) + ", " + Instant.ofEpochMilli(r.endTime) + "]"
             )
         }
+        println("Number of Rows=" + this.rows.size)
+
+    }
+
+    override fun coalesce() {
+        for (row in rows){
+            for (rowi in rows) {
+                if (row == rowi && row.startTime == rowi.endTime){
+                    rowi.endTime = row.startTime
+                    row.startTime = rowi.endTime
+                }
+            }
+        }
+        rows = rows.distinct().toMutableList()
     }
 }

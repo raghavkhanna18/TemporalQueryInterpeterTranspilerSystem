@@ -1,7 +1,7 @@
 package tsql.ast.nodes
 
 import tsql.ast.nodes.visitor.Visitable
-import tsql.ast.symbol_table.SymbolTableInterface
+import tsql.ast.symbol_table.SymbolTable
 import tsql.ast.types.EBinOp
 import tsql.database.Condition
 import tsql.database.Table
@@ -19,9 +19,9 @@ class WhereOperationAST(
     override fun checkNode(
         syntaxErrorListener: SyntaxErrorListener,
         semanticErrorListener: SemanticErrorListener,
-        queryInfo: SymbolTableInterface
+        queryInfo: SymbolTable
     ) {
-        TODO("Not yet implemented")
+        return
     }
 
     override fun execute(dataSourceI: DataSourceI?): DataSourceI? {
@@ -59,17 +59,36 @@ class WhereOperationAST(
 
     fun updateConditionType(condition: Condition, dataSource: DataSourceI) {
         if (!condition.lhsIsLiteral) {
-            val data = dataSource.getData()
+            val data = dataSource.getData() as Table
             val index = data.columnNames.indexOf(condition.lhs)
             val type = data.columnTypes[index]
             condition.lhsType = type
         }
 
         if (!condition.rhsIsLiteral) {
-            val data = dataSource.getData()
+            val data = dataSource.getData() as Table
             val index = data.columnNames.indexOf(condition.rhs)
             val type = data.columnTypes[index]
             condition.rhsType = type
         }
+    }
+
+    override fun toSQL(symbolTable: SymbolTable?): Pair<String, Pair<String, String>> {
+        var whereString = ""
+        if (rhs != null && conjuction != null && !rhsNested && lhs != null) {
+            val lhsData = lhs.toSQL(symbolTable)
+            val rhsData = rhs.toSQL(symbolTable)
+            whereString = lhsData.first + " " +  conjuction + " " + rhsData.first
+        } else if( !rhsNested && lhs != null && conjuction == null){
+            val lhsData = lhs.toSQL(symbolTable)
+            whereString = lhsData.first + " "
+        } else if (rhsNested && lhs != null) {
+            val lhsData = lhs.toSQL(symbolTable)
+            whereString = "( ${lhsData.first} )"
+        } else if (rhsNested && rhs != null) {
+            val rhsData = rhs.toSQL(symbolTable)
+            whereString = " ( ${rhsData.first} ) "
+        }
+        return Pair(whereString, Pair("", ""))
     }
 }

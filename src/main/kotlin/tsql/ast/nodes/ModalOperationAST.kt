@@ -5,8 +5,9 @@ import tsql.Utils.MAX_TIME
 import tsql.Utils.TIME_UNITS
 import tsql.Utils.CURRENT_TIME
 import tsql.ast.nodes.visitor.Visitable
-import tsql.ast.symbol_table.SymbolTableInterface
+import tsql.ast.symbol_table.SymbolTable
 import tsql.database.Row
+import tsql.database.Table
 import tsql.decrementTime
 import tsql.error.SemanticErrorListener
 import tsql.error.SyntaxErrorListener
@@ -21,13 +22,13 @@ class ModalOperationAST(
     override fun checkNode(
         syntaxErrorListener: SyntaxErrorListener,
         semanticErrorListener: SemanticErrorListener,
-        queryInfo: SymbolTableInterface
+        queryInfo: SymbolTable
     ) {
         TODO("Not yet implemented")
     }
 
     override fun execute(dataSourceI: DataSourceI?): DataSourceI? {
-        if (dataSourceI != null) {
+        if (dataSourceI != null && dataSourceI is Table) {
             when (operation) {
                 EModalOperation.ALWAYS_PAST -> filterForAlwaysPast(dataSourceI.getData().rows)
                 EModalOperation.ALWAYS_FUTURE -> filterForAlwaysFuture(dataSourceI.getData().rows)

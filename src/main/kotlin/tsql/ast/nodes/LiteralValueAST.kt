@@ -1,6 +1,6 @@
 package tsql.ast.nodes
 
-import tsql.ast.symbol_table.SymbolTableInterface
+import tsql.ast.symbol_table.SymbolTable
 import tsql.ast.types.EType
 import tsql.error.SemanticErrorListener
 import tsql.error.SyntaxErrorListener
@@ -18,7 +18,7 @@ class LiteralValueAST (
     override fun checkNode(
         syntaxErrorListener: SyntaxErrorListener,
         semanticErrorListener: SemanticErrorListener,
-        queryInfo: SymbolTableInterface
+        queryInfo: SymbolTable
     ) {
         super.checkNode(syntaxErrorListener, semanticErrorListener, queryInfo)
     }

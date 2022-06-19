@@ -1,13 +1,15 @@
 package tsql
 
-import com.xenomachina.argparser.ArgParser
 import com.xenomachina.argparser.mainBody
 import tsql.ast.constructAndCreateAST
 import tsql.error.CommonErrorPrinter
 import tsql.error.ErrorAccumulator
+import kotlin.system.measureTimeMillis
+
 fun main(args: Array<String>) = mainBody {
-    val input =
-        "SELECT  * FROM  base_artists  UNTIL JOIN base_songs  on base_artists.artist = base_songs.artist where base_artists.rank != 1 and (base_artists.artist != 'BTS' or base_artists.artist = 'Adele');"
+    val st = "SELECT a.artist, a.rank, b.title, b.rank FROM  top_100_artists as 'a' UNTIL top_100_songs as 'b'  WHERE a.artist = 'BTS' OR (a.rank = 1 AND b.rank = 2);"
+val time  = measureTimeMillis { val input =
+    st
     val syntaxErrorAccumulator = ErrorAccumulator(
         Constants.SYNTAX_EXIT_CODE,
         CommonErrorPrinter(arrayOf(input))
@@ -22,5 +24,6 @@ fun main(args: Array<String>) = mainBody {
         semanticErrorAccumulator,
         input
     )
-
+}
+    println(time)
 }

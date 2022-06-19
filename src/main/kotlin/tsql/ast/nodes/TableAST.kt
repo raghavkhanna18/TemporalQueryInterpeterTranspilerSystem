@@ -1,7 +1,7 @@
 package tsql.ast.nodes
 
 import tsql.ast.nodes.visitor.Visitable
-import tsql.ast.symbol_table.SymbolTableInterface
+import tsql.ast.symbol_table.SymbolTable
 import tsql.database.Query
 import tsql.database.Table
 import tsql.error.SemanticErrorListener
@@ -9,7 +9,7 @@ import tsql.error.SyntaxErrorListener
 
 class TableAST(
     val name: String,
-    val alias: String = ""
+    var alias: String = ""
 ) : AstNodeI, Visitable(), DataSourceI {
     override val id: NodeId = AstNodeI.getId()
     var table: Table? = null
@@ -17,9 +17,15 @@ class TableAST(
     override fun checkNode(
         syntaxErrorListener: SyntaxErrorListener,
         semanticErrorListener: SemanticErrorListener,
-        queryInfo: SymbolTableInterface
+        queryInfo: SymbolTable
     ) {
-        TODO("Not yet implemented")
+        alias = alias.removePrefix("'")
+        alias = alias.removeSuffix("'")
+        if (alias != "") {
+            alias = queryInfo.createTableAlias(name, alias)
+        } else {
+            alias = queryInfo.getOrCreateTableAlias(name)
+        }
     }
 
     override fun execute(dataSourceI: DataSourceI?): DataSourceI? {
@@ -54,5 +60,12 @@ class TableAST(
 
     override fun clone(): Table {
         TODO("Not yet implemented")
+    }
+
+    override fun toSQL(symbolTable: SymbolTable?): Pair<String, Pair<String, String>> {
+        if (alias != ""){
+            return Pair("$name $alias", Pair("",""))
+        }
+        return Pair("$name", Pair("",""))
     }
 }

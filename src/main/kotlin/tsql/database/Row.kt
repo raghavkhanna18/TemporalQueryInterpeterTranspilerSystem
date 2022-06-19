@@ -13,15 +13,22 @@ data class Row(
         }
     }
 
+    @OptIn(ExperimentalStdlibApi::class)
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
 
         other as Row
-
-        if (startTime != other.startTime) return false
-        if (endTime != other.endTime) return false
-        if (data != other.data) return false
+        //
+        // if (startTime != other.startTime) return false
+        // if (endTime != other.endTime) return false
+        var tdata = data.toMutableList()
+        // tdata.removeLast()
+        // tdata.removeLast()
+        var otdata = other.data.toMutableList()
+        // otdata.removeLast()
+        // otdata.removeLast()
+        if (tdata != otdata) return false
 
         return true
     }
