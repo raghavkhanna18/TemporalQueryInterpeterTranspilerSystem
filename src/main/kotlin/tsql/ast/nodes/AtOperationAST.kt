@@ -4,6 +4,11 @@ import tsql.Utils
 import tsql.ast.symbol_table.SymbolTable
 import tsql.ast.types.EType
 import tsql.error.SyntaxErrorListener
+import java.time.Instant
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.ZoneOffset
+import java.time.format.DateTimeParseException
 
 class AtOperationAST(
     val literalValueAST: LiteralValueAST
@@ -24,10 +29,27 @@ class AtOperationAST(
     }
 
     fun convertLiteralValueToLong(literalValue : String, type: EType) : Long {
-        return when(type){
-            EType.DATE, EType.DATETIME -> { 0}
-            EType.LONG, EType.INT, EType.BIGINT ->  {literalValue.toLong()}
-            EType.DECIMAL, EType.FLOAT, EType.DOUBLE, EType.NUM -> {literalValue.toDouble().toLong()}
+        return when (type) {
+            EType.DATE, EType.DATETIME, EType.STRING -> {
+                try {
+                    val parsedDate = LocalDate.parse(literalValue)
+                    return parsedDate.atStartOfDay().toInstant(ZoneOffset.UTC).toEpochMilli()
+                } catch (e: DateTimeParseException) {
+                    try {
+                        val parsedDateTime = LocalDateTime.parse(literalValue)
+                        return parsedDateTime.toInstant(ZoneOffset.UTC).toEpochMilli()
+                    } catch (e: DateTimeParseException) {
+
+                    }
+                }
+                return Instant.now().toEpochMilli()
+            }
+            EType.LONG, EType.INT, EType.BIGINT -> {
+                literalValue.toLong()
+            }
+            EType.DECIMAL, EType.FLOAT, EType.DOUBLE, EType.NUM -> {
+                literalValue.toDouble().toLong()
+            }
             else -> {
                 0
             }
