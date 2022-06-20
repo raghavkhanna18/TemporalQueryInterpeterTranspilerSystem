@@ -134,7 +134,7 @@ fun getOverlapContion(symbolTable: SymbolTable): String {
     val firstTableName = if (firstTable.second != "") firstTable.second else firstTable.first
     val secondTable = tableNames.get(1)
     val secondTableName = if (secondTable.second != "") secondTable.second else secondTable.first
-    return "AND $firstTableName.start_time < $secondTableName.end_time AND  $secondTableName.start_time < $firstTableName.start_time"
+    return "AND $firstTableName.start_time < $secondTableName.end_time AND  $secondTableName.start_time < $firstTableName.end_time"
 }
 
 fun getTimeUnitString(): String {
@@ -174,7 +174,7 @@ fun alterAttributes(basSQL: String): Pair<String, List<String>> {
     val renamedAts = mutableListOf<String>()
     val combinedNames = mutableListOf<String>()
     for (at in ats) {
-        if (!at.contains("AS")) {
+        if (!at.contains("AS") && !at.contains("GREATEST") &&  !at.contains("LEAST") ) {
             val firstPart = ".*(?=\\.)".toRegex().find(at)?.groupValues?.first() ?: ""
             val secondPart = "(?<=\\.).*".toRegex().find(at)?.groupValues?.first() ?: ""
             val combinedName = "$firstPart$secondPart".trim()

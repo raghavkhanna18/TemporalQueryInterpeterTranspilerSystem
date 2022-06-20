@@ -43,6 +43,7 @@ class SymbolTable(val enclosure: SymbolTableInterface? = null) :
     }
 
     override fun getTableNames(): List<Pair<String, String>> {
-        return tableNameToAlias.toList()
+        val tns = tableNameToAlias.toList()
+        return tns.reversed()
     }
 }

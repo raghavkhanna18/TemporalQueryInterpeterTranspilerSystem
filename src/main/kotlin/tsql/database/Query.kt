@@ -9,7 +9,6 @@ import java.sql.JDBCType
 import java.sql.ResultSet
 import java.sql.ResultSetMetaData
 import java.sql.SQLException
-import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneOffset
@@ -33,6 +32,27 @@ object Query {
             /* execute the query */
             val stmt = connection.createStatement()
             val rs = stmt.executeQuery(qry)
+            val meta = rs.metaData
+
+            extractColumns(table, meta)
+            extractRows(table, rs)
+        } catch (e: SQLException) {
+            println("SQL error ${e.message}")
+        }
+        return table
+    }
+
+    fun exec(qrys: String): Table {
+        val table = Table()
+        try {
+            /* execute the query */
+            val stmt = connection.createStatement()
+            stmt.execute(qrys)
+
+            while (stmt.resultSet == null) {
+                stmt.moreResults
+            }
+            val rs =  stmt.resultSet
             val meta = rs.metaData
 
             extractColumns(table, meta)
@@ -85,9 +105,9 @@ object Query {
         try {
             for (i in 0 until count) {
                 s = meta.getColumnLabel(i + 1)
-                if (s == "start_time") {
+                if (s == "start_time" || s == "s") {
                     startTimePos = i
-                } else if (s == "end_time") {
+                } else if (s == "end_time" || s == "e") {
                     endTimePos = i
                 }
 

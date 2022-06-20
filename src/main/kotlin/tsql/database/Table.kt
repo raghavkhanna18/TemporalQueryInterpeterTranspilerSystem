@@ -8,6 +8,7 @@ import tsql.ast.types.EBinOp
 import tsql.ast.types.EType
 import tsql.error.SemanticError
 import tsql.error.SyntaxErrorListener
+import java.io.File
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.time.Instant
@@ -865,5 +866,33 @@ class Table(
             }
         }
         rows = rows.distinct().toMutableList()
+    }
+
+    fun toCSV(file: File) {
+        val fileWriter = file.writer()
+
+        for (i in 0 until this.numberOfColumns) {
+            fileWriter.append("\"<" + this.columnNames[i] + ">\", ")
+        }
+        fileWriter.append("\n")
+
+        for (i in 0 until this.numberOfColumns) {
+            fileWriter.append("\"<" + this.columnTypes[i] + ">\", ")
+        }
+        fileWriter.append("\n")
+
+        for (i in 0 until this.rows.size) {
+            val r = this.rows[i]
+            val values = r.data
+
+            for (j in values.indices) {
+                fileWriter.append(values[j].toString() + " , ")
+            }
+            fileWriter.append(
+                " \"[" + Instant.ofEpochMilli(r.startTime) + ", " + Instant.ofEpochMilli(r.endTime) + "]\"\n"
+            )
+        }
+        fileWriter.flush()
+        fileWriter.close()
     }
 }
