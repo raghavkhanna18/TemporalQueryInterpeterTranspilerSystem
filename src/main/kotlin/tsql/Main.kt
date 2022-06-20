@@ -51,7 +51,6 @@ object Main {
     }
 
     fun transpile(absSynTree: ProgramAST, symbolTable: SymbolTable, file: File? = null): String {
-
         return absSynTree.toSQL(symbolTable).first
     }
 

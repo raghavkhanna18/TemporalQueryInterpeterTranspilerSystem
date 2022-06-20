@@ -1,6 +1,8 @@
 package tsql.ast.nodes
 
+import tsql.alterAttributes
 import tsql.ast.symbol_table.SymbolTable
+import tsql.createALLSQl
 import tsql.error.SyntaxErrorListener
 
 class ProgramAST(
@@ -36,7 +38,11 @@ class ProgramAST(
 
     override fun toSQL(symbolTable: SymbolTable?): Pair<String, Pair<String, String>> {
         for (statement in statementList) {
-            return statement.toSQL(symbolTable)
+            val sql = statement.toSQL(symbolTable).first
+            val tempSQL = alterAttributes(sql)
+            val fullSQL = createALLSQl(tempSQL)
+            print(fullSQL)
+            return Pair(fullSQL, Pair("",""))
         }
         return Pair("",Pair("",""))
     }

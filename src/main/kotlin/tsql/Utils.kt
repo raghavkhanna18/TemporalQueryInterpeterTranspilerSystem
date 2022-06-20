@@ -158,7 +158,84 @@ fun getTimeUnitString(): String {
     }
 }
 
-
 fun overlap(left: Row, right: Row): Boolean {
     return left.startTime < right.endTime && right.startTime < left.endTime
 }
+
+fun alterAttributes(basSQL: String): Pair<String, List<String>> {
+    val regex = "(?<=SELECT)(.*?)(?=FROM)".toRegex()
+    val matches = regex.find(basSQL)
+    val matchesList = matches?.groupValues
+    var match = ""
+    if (matchesList != null) {
+        match = matchesList.first()
+    }
+    val ats = match.split(",")
+    val renamedAts = mutableListOf<String>()
+    val combinedNames = mutableListOf<String>()
+    for (at in ats) {
+        if (!at.contains("AS")) {
+            val firstPart = ".*(?=\\.)".toRegex().find(at)?.groupValues?.first() ?: ""
+            val secondPart = "(?<=\\.).*".toRegex().find(at)?.groupValues?.first() ?: ""
+            val combinedName = "$firstPart$secondPart".trim()
+            combinedNames.add(combinedName)
+            renamedAts.add("$at AS $combinedName")
+        } else {
+            renamedAts.add(at)
+        }
+    }
+    val combinedString = renamedAts.joinToString(", ")
+    val newString = basSQL.replaceFirst(regex, combinedString)
+    return Pair(newString, combinedNames)
+}
+
+fun createALLSQl(baseSqlAndRenames: Pair<String, List<String>>): String {
+    var fullString = ""
+    val baseSQL = baseSqlAndRenames.first
+
+    val combinedNames = baseSqlAndRenames.second
+    val modCombinedNames = mutableListOf<String>()
+    for (combinedName in combinedNames) {
+        modCombinedNames.add("c.$combinedName")
+    }
+    val modCombinedNamesString = modCombinedNames.joinToString(", ")
+    val combinedNameString = combinedNames.joinToString(", ")
+    val attributeEquality = mutableListOf<String>()
+    for (combinedName in combinedNames) {
+        attributeEquality.add("c.$combinedName = d.$combinedName")
+    }
+    val attributeEqualityString = attributeEquality.joinToString(" AND ")
+    fullString +=
+        """
+        DROP TABLE IF EXISTS i_t;
+        CREATE TEMP TABLE i_t AS
+        $baseSQL
+        DROP TABLE IF EXISTS  base_example_rec;
+        CREATE TEMP TABLE base_example_rec AS
+        WITH RECURSIVE all_rel AS (SELECT *
+                           FROM i_t
+                           UNION
+                           SELECT *
+                           FROM (WITH inner_rel AS (SELECT * FROM all_rel)
+                           SELECT $modCombinedNamesString, d.s as s, c.e as e
+                           FROM i_t c
+                           CROSS join inner_rel d
+                           WHERE c.s <= d.e
+                           AND c.e >= d.e
+                           AND d.s != c.s
+                           AND c.e != d.e
+                           AND $attributeEqualityString )
+                           t )
+        SELECT * FROM all_rel;
+        SELECT $combinedNameString, s, e FROM (SELECT *,
+                row_number() OVER
+                    (PARTITION BY $combinedNameString, s ORDER BY e desc) AS srown,
+                row_number() OVER
+                    (PARTITION BY $combinedNameString, e ORDER BY s asc) AS erown
+                FROM base_example_rec) r
+        WHERE  r.srown = 1 AND r.erown = 1 ORDER BY s, e desc;
+        """.trimIndent()
+    return fullString
+}
+
+
