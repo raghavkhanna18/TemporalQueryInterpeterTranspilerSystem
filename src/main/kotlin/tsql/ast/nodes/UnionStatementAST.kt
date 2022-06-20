@@ -2,7 +2,7 @@ package tsql.ast.nodes
 
 import tsql.ast.symbol_table.SymbolTable
 import tsql.database.Table
-import tsql.error.SemanticError
+import tsql.error.CompileError
 import tsql.error.SyntaxErrorListener
 
 class UnionStatementAST(
@@ -35,9 +35,9 @@ class UnionStatementAST(
                     combinedTable.coalesce()
                     return combinedTable
                 }
-                throw SemanticError("Incompatible columns in Union")
+                throw CompileError("Semantic","Incompatible columns in Union")
             }
-            throw SemanticError("Incompatible columns in Union")
+            throw CompileError("Semantic","Incompatible columns in Union")
         }
         return tableA
     }

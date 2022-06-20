@@ -2,7 +2,7 @@ package tsql.database
 
 import tsql.ast.types.EType
 import tsql.ast.types.JDBCTypes
-import tsql.error.SemanticError
+import tsql.error.CompileError
 import java.sql.Connection
 import java.sql.DriverManager
 import java.sql.JDBCType
@@ -161,7 +161,7 @@ object Query {
             val startTimeType = JDBCType.valueOf(rs.metaData.getColumnType(startTimePos + 1))
             val endTimeType = JDBCType.valueOf(rs.metaData.getColumnType(endTimePos + 1))
             if (startTimeType != endTimeType) {
-                throw SemanticError("Start time and End time must be of same type")
+                throw CompileError("Semantic","Start time and End time must be of same type")
             }
             when (startTimeType) {
                 JDBCType.DATE -> {

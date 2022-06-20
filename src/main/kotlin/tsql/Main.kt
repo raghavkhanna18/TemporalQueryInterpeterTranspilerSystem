@@ -8,8 +8,6 @@ import tsql.ast.nodes.ProgramAST
 import tsql.ast.symbol_table.SymbolTable
 import tsql.database.Query
 import tsql.database.Table
-import tsql.error.CommonErrorPrinter
-import tsql.error.ErrorAccumulator
 import java.io.File
 
 fun main(args: Array<String>) = mainBody {
@@ -44,13 +42,8 @@ object Main {
     fun main(args: Array<String>) {
         ArgParser(args).parseInto(::ProgramArgs).run {
             val input = query
-            val syntaxErrorAccumulator = ErrorAccumulator(
-                Constants.SYNTAX_EXIT_CODE,
-                CommonErrorPrinter(arrayOf(input))
-            )
 
             val (absSynTree, symbolTable) = constructAndCreateAST(
-                syntaxErrorAccumulator,
                 input
             )
 

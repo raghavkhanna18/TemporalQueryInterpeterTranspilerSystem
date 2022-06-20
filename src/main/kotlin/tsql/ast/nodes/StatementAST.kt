@@ -53,6 +53,9 @@ class StatementAST(
         selectClause += data.second.second
         selectClause += modal?.second?.second ?: ""
         selectClause += atOp?.second?.second ?: ""
+        selectClause = selectClause.trim()
+        selectClause = selectClause.removeSuffix(",")
+        selectClause += " "
         var combined = "$selectClause FROM ${data.first} $whereClause ${modal?.first ?: ""} ${atOp?.first ?: ""}"
         combined = combined.trim()
         return Pair(combined, Pair("",""))

@@ -6,12 +6,14 @@ import tsql.ast.nodes.NodeId
 import tsql.ast.symbol_table.SymbolTable
 import tsql.ast.types.EBinOp
 import tsql.ast.types.EType
-import tsql.error.SemanticError
+import tsql.error.CompileError
 import tsql.error.SyntaxErrorListener
 import java.io.File
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.time.Instant
+import kotlin.math.max
+import kotlin.math.min
 
 class Table(
     var columnNames: MutableList<String> = mutableListOf(),
@@ -24,12 +26,10 @@ class Table(
     override fun checkNode(
         syntaxErrorListener: SyntaxErrorListener,
         queryInfo: SymbolTable
-    ) {
-        TODO("Not yet implemented")
-    }
+    ) {}
 
     override fun execute(dataSourceI: DataSourceI?): DataSourceI? {
-        TODO("Not yet implemented")
+        return dataSourceI
     }
 
     fun putCollumns(numberOfColumns: Int, columnNames: MutableList<String>, columnTypes: MutableList<EType>) {
@@ -47,7 +47,7 @@ class Table(
         return this
     }
 
-    override fun clone(): Table {
+    public override fun clone(): Table {
         return Table(
             columnNames.toMutableList(),
             columnTypes.toMutableList(),
@@ -86,7 +86,7 @@ class Table(
 
     override fun project(columns: List<String>) {
 
-        if (this.columnNames.containsAll(columns)) {
+        if (this.columnNames.containsAll(columns) || this.columnNames.containsAll(getBaseColumns(columns)) ) {
             val columnsToRemove = this.columnNames.toMutableList().minus(columns)
             this.removeColumns(columnsToRemove)
         } else {
@@ -96,10 +96,14 @@ class Table(
                 } else if (this.columnNames.contains(column)) {
                     this.removeColumn(column)
                 } else {
-                    throw SemanticError("Invalid Columns Provided")
+                    throw CompileError("Semantic","Invalid Columns Provided")
                 }
             }
         }
+    }
+
+    fun getBaseColumns(columns: List<String>): List<String> {
+        return columns.map { col: String -> col.split(".").last()}
     }
 
     fun filter(conditions: Pair<MutableList<EBinOp>, MutableList<Condition>>) {
@@ -859,9 +863,10 @@ class Table(
     override fun coalesce() {
         for (row in rows){
             for (rowi in rows) {
-                if (row == rowi && row.startTime == rowi.endTime){
-                    rowi.endTime = row.startTime
-                    row.startTime = rowi.endTime
+                if (row == rowi
+                    && row.startTime <= rowi.endTime && rowi.startTime <= row.endTime) {
+                    row.startTime = min(row.startTime, rowi.startTime)
+                    row.endTime = max(row.endTime, rowi.endTime)
                 }
             }
         }
@@ -872,12 +877,12 @@ class Table(
         val fileWriter = file.writer()
 
         for (i in 0 until this.numberOfColumns) {
-            fileWriter.append("\"<" + this.columnNames[i] + ">\", ")
+            fileWriter.append("\"<" + this.columnNames[i] + ">\",")
         }
         fileWriter.append("\n")
 
         for (i in 0 until this.numberOfColumns) {
-            fileWriter.append("\"<" + this.columnTypes[i] + ">\", ")
+            fileWriter.append("\"<" + this.columnTypes[i] + ">\",")
         }
         fileWriter.append("\n")
 
@@ -886,10 +891,10 @@ class Table(
             val values = r.data
 
             for (j in values.indices) {
-                fileWriter.append(values[j].toString() + " , ")
+                fileWriter.append("\"${values[j]}\"" + ",")
             }
             fileWriter.append(
-                " \"[" + Instant.ofEpochMilli(r.startTime) + ", " + Instant.ofEpochMilli(r.endTime) + "]\"\n"
+                " \"[" + Instant.ofEpochMilli(r.startTime) + "," + Instant.ofEpochMilli(r.endTime) + "]\"\n"
             )
         }
         fileWriter.flush()

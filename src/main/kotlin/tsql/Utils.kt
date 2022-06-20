@@ -28,7 +28,7 @@ import java.time.temporal.ChronoUnit.YEARS
 object Utils {
     const val MIN_TIME = 0L
     var MAX_TIME = Instant.now().toEpochMilli()
-    var CURRENT_TIME = 3L
+    var CURRENT_TIME = Instant.now().toEpochMilli()
     var TIME_UNITS = DAYS
 }
 
@@ -179,7 +179,7 @@ fun alterAttributes(basSQL: String): Pair<String, List<String>> {
             val secondPart = "(?<=\\.).*".toRegex().find(at)?.groupValues?.first() ?: ""
             val combinedName = "$firstPart$secondPart".trim()
             combinedNames.add(combinedName)
-            renamedAts.add("$at AS $combinedName")
+            renamedAts.add("$at AS $combinedName ")
         } else {
             renamedAts.add(at)
         }

@@ -17,10 +17,7 @@ literal_value:
 ;
 
 join_operator:
-LEFT_ OUTER_? JOIN_                     # left_join
-| RIGHT_ OUTER_? JOIN_                  # right_join
-| INNER_ JOIN_                          # inner_join
-| CROSS_ JOIN_                          # cross_join
+ INNER_ JOIN_                          # inner_join
 | SINCE_ JOIN_                          # since_join
 | UNTIL_ JOIN_                          # until_join
 ;
@@ -187,10 +184,10 @@ union_statement:
     ;
 
 statement:
-    select_operator FROM_ table (WHERE_ where_operation)? (modal_operation)? (at_operation)?                           # select_from_table
-    | select_operator FROM_ binary_operation (WHERE_ where_operation)? (modal_operation)? (at_operation)?              # select_from_bin_opn
+    select_operator FROM_ table (WHERE_ where_operation)? (modal_operation)? (at_operation)?                            # select_from_table
+    | select_operator FROM_ binary_operation (WHERE_ where_operation)? (modal_operation)? (at_operation)?               # select_from_bin_opn
     | select_operator FROM_ join_operation ( WHERE_ where_operation)? (modal_operation)? (at_operation)?                # select_from_join
-    | select_operator FROM_ OPEN_PAR statement CLOSE_PAR ( WHERE_ where_operation)? (modal_operation)? (at_operation)? # select_nested
+    | select_operator FROM_ OPEN_PAR statement CLOSE_PAR ( WHERE_ where_operation)? (modal_operation)? (at_operation)?  # select_nested
 
 ;
 

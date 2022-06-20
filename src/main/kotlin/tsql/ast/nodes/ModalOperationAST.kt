@@ -1,9 +1,10 @@
 package tsql.ast.nodes
 
-import tsql.Utils.MIN_TIME
-import tsql.Utils.MAX_TIME
-import tsql.Utils.TIME_UNITS
+import tsql.Utils
 import tsql.Utils.CURRENT_TIME
+import tsql.Utils.MAX_TIME
+import tsql.Utils.MIN_TIME
+import tsql.Utils.TIME_UNITS
 import tsql.ast.symbol_table.SymbolTable
 import tsql.ast.types.EModalOperation
 import tsql.database.Row
@@ -22,7 +23,6 @@ class ModalOperationAST(
         syntaxErrorListener: SyntaxErrorListener,
         queryInfo: SymbolTable
     ) {
-        TODO("Not yet implemented")
     }
 
     override fun execute(dataSourceI: DataSourceI?): DataSourceI? {
@@ -37,6 +37,55 @@ class ModalOperationAST(
             }
         }
         return dataSourceI
+    }
+
+    override fun toSQL(symbolTable: SymbolTable?): Pair<String, Pair<String, String>> {
+        val tNames = symbolTable?.getTableNames().orEmpty()
+        val tNamea = tNames.first().second
+       return when (operation) {
+            EModalOperation.ALWAYS_PAST -> Pair(
+                "",
+                Pair(
+                    "AND EXTRACT(epoch from $tNamea.start_time) <= $MIN_TIME AND EXTRACT(epoch from $tNamea.end_time) >= $CURRENT_TIME",
+                    ""
+                )
+            )
+            EModalOperation.ALWAYS_FUTURE -> Pair(
+                "",
+                Pair(
+                    "AND EXTRACT(epoch from $tNamea.end_time) >= $MAX_TIME AND EXTRACT(epoch from $tNamea.start_time) <= $CURRENT_TIME",
+                    ""
+                )
+            )
+            EModalOperation.PAST -> Pair("", Pair("AND EXTRACT(epoch from $tNamea.start_time) <= $MIN_TIME", ""))
+            EModalOperation.FUTURE -> Pair("", Pair("AND EXTRACT(epoch from $tNamea.end_time) >= $MAX_TIME", ""))
+            EModalOperation.NEXT -> Pair(
+                "", Pair(
+                    "AND EXTRACT(epoch from $tNamea.end_time) >= ${
+                        incrementTime(
+                            CURRENT_TIME, Utils.TIME_UNITS
+                        )
+                    } AND EXTRACT(epoch from $tNamea.start_time) <= ${
+                        incrementTime(
+                            CURRENT_TIME, Utils.TIME_UNITS
+                        )
+                    }", ""
+                )
+            )
+            EModalOperation.PREVIOUS -> Pair(
+                "", Pair(
+                    "AND EXTRACT(epoch from $tNamea.end_time) >= ${
+                        decrementTime(
+                            CURRENT_TIME, Utils.TIME_UNITS
+                        )
+                    } AND EXTRACT(epoch from $tNamea.start_time) <= ${
+                        decrementTime(
+                            CURRENT_TIME, Utils.TIME_UNITS
+                        )
+                    }", ""
+                )
+            )
+        }
     }
 
     fun filterForAlwaysPast(rows: MutableList<Row>) {

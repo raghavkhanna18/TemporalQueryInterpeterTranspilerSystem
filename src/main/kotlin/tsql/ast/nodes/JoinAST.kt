@@ -10,7 +10,7 @@ import tsql.ast.types.JoinType
 import tsql.database.Row
 import tsql.database.Table
 import tsql.decrementTime
-import tsql.error.SemanticError
+import tsql.error.CompileError
 import tsql.error.SyntaxErrorListener
 import tsql.getOverlapContion
 import tsql.getTimeUnitString
@@ -239,7 +239,7 @@ class JoinAST(
             rightAttributeAST.type = rightTable.columnTypes[rightAttributeIndex]
         }
         if (leftAttributeAST.type != rightAttributeAST.type && !(leftAttributeAST.type.isNumeric() && rightAttributeAST.type.isNumeric())) {
-            throw SemanticError("Invalid attributes to join on")
+            throw CompileError("Semantic","Invalid attributes to join on")
         }
         return execMergeJoin(
             leftTable,

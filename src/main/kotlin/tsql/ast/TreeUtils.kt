@@ -12,7 +12,6 @@ import org.antlr.v4.runtime.tree.Trees
 import tsql.ast.nodes.ProgramAST
 import tsql.ast.constructors.ProgramConstructor
 import tsql.ast.symbol_table.SymbolTable
-import tsql.error.ErrorAccumulator
 import tsql.error.SyntaxErrorListener
 
 typealias TSQLParseTree = TSQLParser.ProgramContext
@@ -41,19 +40,18 @@ fun constructParser(syntaxErrorListener: SyntaxErrorListener, charStream: CharSt
     return parser
 }
 
-fun constructAndCreateAST(syntaxErrorAccumulator: ErrorAccumulator, input: String): Pair<ProgramAST, SymbolTable> {
+fun constructAndCreateAST(input: String): Pair<ProgramAST, SymbolTable> {
     val charStream = CharStreams.fromString(input)
-    val astSymbolTable = createAST(syntaxErrorAccumulator, charStream)
+    val astSymbolTable = createAST(charStream)
 
     return astSymbolTable
 }
 
 
 private fun createAST(
-    syntaxErrorAccumulator: ErrorAccumulator,
     charStream: CharStream
 ): Pair<ProgramAST, SymbolTable> {
-    val syntaxErrorListener = SyntaxErrorListener(syntaxErrorAccumulator)
+    val syntaxErrorListener = SyntaxErrorListener()
 
     // Create parser and construct parse tree
     val parser: TSQLParser =
